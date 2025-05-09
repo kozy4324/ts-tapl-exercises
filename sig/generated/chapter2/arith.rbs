@@ -1,0 +1,11 @@
+# Generated from lib/chapter2/arith.rb with RBS::Inline
+
+class TinyRbParser
+  # : (String) -> term
+  def self.parse: (String) -> term
+
+  # : (Prism::node | nil) -> term
+  def self.term: (Prism::node | nil) -> term
+end
+
+type term = { tag: "true" } | { tag: "false" } | { tag: "if", cond: term, thn: term, els: term } | { tag: "number", n: Integer } | { tag: "add", left: term, right: term }

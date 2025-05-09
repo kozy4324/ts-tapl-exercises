@@ -1,6 +1,4 @@
-import { parseArith } from "npm:tiny-ts-parser";
-
-type Type =
+export type Type =
   | { tag: "Boolean" }
   | { tag: "Number" };
 
@@ -11,7 +9,7 @@ type Term =
   | { tag: "number"; n: number }
   | { tag: "add"; left: Term; right: Term };
 
-function typecheck(t: Term): Type {
+export function typecheck(t: Term): Type {
   switch (t.tag) {
     case "true":
       return { tag: "Boolean" };
@@ -22,7 +20,7 @@ function typecheck(t: Term): Type {
       if (condTy.tag !== "Boolean") throw "boolean expected";
       const thnTy = typecheck(t.thn);
       const elsTy = typecheck(t.els);
-      if (thnTy.tag !== elsTy.tag) throw "then and else have deifferent types";
+      if (thnTy.tag !== elsTy.tag) throw "then and else have different types";
       return thnTy;
     }
     case "number":
@@ -40,5 +38,3 @@ function typecheck(t: Term): Type {
     }
   }
 }
-
-console.log(typecheck(parseArith("1 + 2")));

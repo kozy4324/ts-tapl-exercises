@@ -32,9 +32,9 @@ end
 
 Deno.test("1 + 2", expectResult({ tag: "Number" }));
 Deno.test("1 + true", expectThrow("number expected"));
-# Deno.test("1 + (2 + 3)", expectResult({ tag: "Number" }));
+Deno.test("1 + (2 + 3)", expectResult({ tag: "Number" }));
 Deno.test("true ? 1 : 2", expectResult({ tag: "Number" }));
 Deno.test("true ? false : true", expectResult({ tag: "Boolean" }));
 Deno.test("1 ? 2 : 3", expectThrow("boolean expected"));
 Deno.test("true ? 1 : true", expectThrow("then and else have different types"));
-# Deno.test("true ? (1 + 2) : (3 + (false ? 4 : 5))", expectResult({ tag: "Number" }));
+Deno.test("true ? (1 + 2) : (3 + (false ? 4 : 5))", expectResult({ tag: "Number" }));

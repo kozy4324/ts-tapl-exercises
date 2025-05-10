@@ -48,8 +48,6 @@ class TinyRbParser
 
   #: (Prism::node) -> Term
   def self.term(node)
-    raise "Unknown node type" if node.nil?
-
     case
     when node.is_a?(Prism::TrueNode)
       TrueTerm.new
@@ -65,12 +63,14 @@ class TinyRbParser
       NumberTerm.new(n: node.value)
     when node.is_a?(Prism::CallNode)
       leftNode = node.receiver
-      if leftNode.is_a?(Prism::IntegerNode) && node.name == :+
-        rightNode = node.arguments&.arguments&.first or raise "Unknown node type"
-        AddTerm.new(left: term(leftNode), right: term(rightNode))
-      else
-        raise "Unknown node type"
-      end
+      raise "Unknown node type" unless leftNode.is_a?(Prism::IntegerNode) && node.name == :+
+      rightNode = node.arguments&.arguments&.first or raise "Unknown node type"
+      AddTerm.new(left: term(leftNode), right: term(rightNode))
+    when node.is_a?(Prism::ParenthesesNode)
+      statements = node.body
+      raise "Unknown node type" unless statements.is_a?(Prism::StatementsNode)
+      bodyNode = statements.body.first or raise "Unknown node type"
+      term(bodyNode)
     else
       raise "Unknown node type"
     end

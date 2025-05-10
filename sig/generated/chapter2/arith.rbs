@@ -1,11 +1,45 @@
 # Generated from lib/chapter2/arith.rb with RBS::Inline
 
 class TinyRbParser
-  # : (String) -> term
-  def self.parse: (String) -> term
+  class Term
+  end
 
-  # : (Prism::node) -> term
-  def self.term: (Prism::node) -> term
+  class TrueTerm < Term
+  end
+
+  class FalseTerm < Term
+  end
+
+  class IfTerm < Term
+    attr_accessor cond: Term
+
+    attr_accessor thn: Term
+
+    attr_accessor els: Term
+
+    # : (cond: Term, thn: Term, els: Term) -> void
+    def initialize: (cond: Term, thn: Term, els: Term) -> void
+  end
+
+  class NumberTerm < Term
+    attr_accessor n: Integer
+
+    # : (n: Integer) -> void
+    def initialize: (n: Integer) -> void
+  end
+
+  class AddTerm < Term
+    attr_accessor left: Term
+
+    attr_accessor right: Term
+
+    # : (left: Term, right: Term) -> void
+    def initialize: (left: Term, right: Term) -> void
+  end
+
+  # : (String) -> Term
+  def self.parse: (String) -> Term
+
+  # : (Prism::node) -> Term
+  def self.term: (Prism::node) -> Term
 end
-
-type term = { tag: "true" } | { tag: "false" } | { tag: "if", cond: term, thn: term, els: term } | { tag: "number", n: Integer } | { tag: "add", left: term, right: term }

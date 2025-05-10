@@ -34,9 +34,3 @@ class Checker
     end
   end
 end
-
-puts Checker.typecheck(TinyRbParser.parse("true"))
-puts Checker.typecheck(TinyRbParser.parse("false"))
-puts Checker.typecheck(TinyRbParser.parse("true ? 1 : 2"))
-puts Checker.typecheck(TinyRbParser.parse("3"))
-puts Checker.typecheck(TinyRbParser.parse("4 + 5"))

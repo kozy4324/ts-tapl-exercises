@@ -4,5 +4,5 @@ task "rbs" do
 end
 
 task :default => ["rbs"] do
-  sh "ruby lib/chapter2/arith.rb"
+  sh "ruby lib/chapter2/test_arith.rb"
 end

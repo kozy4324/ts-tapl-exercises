@@ -44,6 +44,8 @@ class TinyRbParser
     node = nodes.first # Prism::node
 
     term(node)
+  rescue RuntimeError => e
+    raise "#{e.message}; source => #{source}"
   end
 
   #: (Prism::node) -> Term
@@ -72,7 +74,7 @@ class TinyRbParser
       bodyNode = statements.body.first or raise "Unknown node type"
       term(bodyNode)
     else
-      raise "Unknown node type"
+      raise "Unknown node type; node => #{node.class}"
     end
   end
 end

@@ -20,7 +20,7 @@ class TinyRbParser
     term(node)
   end
 
-  #: (Prism::node | nil) -> term
+  #: (Prism::node) -> term
   def self.term(node)
     raise "Unknown node type" if node.nil?
 
@@ -30,19 +30,18 @@ class TinyRbParser
     when node.is_a?(Prism::FalseNode)
       { tag: "false" }
     when node.is_a?(Prism::IfNode)
-      statements = node.statements
-      subsequent = node.subsequent
-      if !statements.nil? && subsequent.is_a?(Prism::ElseNode)
-        { tag: "if", cond: term(node.predicate), thn: term(statements.body.first), els: term(subsequent.statements&.body&.first) }
-      else
-        raise "Unknown node type"
-      end
+      statements = node.statements or raise "Unknown node type"
+      subsequent = node.subsequent or raise "Unknown node type"
+      raise "Unknown node type" unless subsequent.is_a?(Prism::ElseNode)
+      elsNode = subsequent.statements&.body&.first or raise "Unknown node type"
+      { tag: "if", cond: term(node.predicate), thn: term(statements.body.first), els: term(elsNode) }
     when node.is_a?(Prism::IntegerNode)
       { tag: "number", n: node.value }
     when node.is_a?(Prism::CallNode)
       receiver = node.receiver
       if receiver.is_a?(Prism::IntegerNode) && node.name == :+
-        { tag: "add", left: term(receiver), right: term(node.arguments&.arguments&.first) }
+        rightNode = node.arguments&.arguments&.first or raise "Unknown node type"
+        { tag: "add", left: term(receiver), right: term(rightNode) }
       else
         raise "Unknown node type"
       end

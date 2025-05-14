@@ -34,9 +34,9 @@ Deno.test("true ? (1 + 2) : (3 + (false ? 4 : 5))", expectResult({ tag: "Number"
 
 Deno.test("(x: boolean) => 42;", expectResult({ tag: "Func", params: [{ name: "x", type: { tag: "Boolean" } }], retType: { tag: "Number" } }));
 Deno.test("(x: number) => x;", expectResult({ tag: "Func", params: [{ name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } }));
-/*
 Deno.test("(x: number, y: number) => x + y;", expectResult({ tag: "Func", params: [{ name: "x", type: { tag: "Number" } }, { name: "y", type: { tag: "Number" } }], retType: { tag: "Number" } }));
-Deno.test("(x: number, y: number) => x + z;", expectThrow("not implemented yet"));
+Deno.test("(x: number, y: number) => x + z;", expectThrow("variable not found"));
+/*
 Deno.test(source`
   const add = (x: number, y: number) => x + y;
   const select = (b: boolean, x: number, y: number) => b ? x : y;

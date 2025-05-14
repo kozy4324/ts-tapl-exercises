@@ -1,6 +1,8 @@
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { parseBasic } from "npm:tiny-ts-parser";
-import { typecheck, Type } from "./basic.ts";
+import { typecheck, Type, typeEq } from "./basic.ts";
+
+const source = (strings: TemplateStringsArray) => strings.join('').replaceAll(/\s*\n\s*/g, ' ').trim();
 
 const expectResult = (expected: Type) => {
   return (context: Deno.TestContext) => {
@@ -29,3 +31,37 @@ Deno.test("true ? false : true", expectResult({ tag: "Boolean" }));
 Deno.test("1 ? 2 : 3", expectThrow("boolean expected"));
 Deno.test("true ? 1 : true", expectThrow("then and else have different types"));
 Deno.test("true ? (1 + 2) : (3 + (false ? 4 : 5))", expectResult({ tag: "Number" }));
+
+/*
+Deno.test("(x: number, y: number) => x + y;", expectResult({ tag: "Func", params: [{ name: "x", type: { tag: "Number" } }, { name: "y", type: { tag: "Number" } }], retType: { tag: "Number" } }));
+Deno.test("(x: number, y: number) => x + z;", expectThrow("not implemented yet"));
+Deno.test(source`
+  const add = (x: number, y: number) => x + y;
+  const select = (b: boolean, x: number, y: number) => b ? x : y;
+  const x = add(1, add(2, 3));
+  select(true, x, x);
+`, expectResult({ tag: "Func", params: [], retType: { tag: "Number" } }));
+*/
+
+Deno.test("Boolean vs Boolean", () => assert(typeEq({ tag: "Boolean" }, { tag: "Boolean" })));
+Deno.test("Number vs Number", () => assert(typeEq({ tag: "Number" }, { tag: "Number" })));
+Deno.test("Boolean vs Number", () => assert(!typeEq({ tag: "Boolean" }, { tag: "Number" })));
+Deno.test("Number vs Boolean", () => assert(!typeEq({ tag: "Number" }, { tag: "Boolean" })));
+Deno.test("Func vs Func", () => assert(typeEq({ tag: "Func", params: [], retType: { tag: "Number" } }, { tag: "Func", params: [], retType: { tag: "Number" } })));
+Deno.test("Func vs Boolean", () => assert(!typeEq({ tag: "Func", params: [], retType: { tag: "Number" } }, { tag: "Boolean" })));
+Deno.test("Func: params.length not match", () => assert(!typeEq(
+  { tag: "Func", params: [ { name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } },
+  { tag: "Func", params: [                                       ], retType: { tag: "Number" } }
+)));
+Deno.test("Func: params.length match", () => assert(typeEq(
+  { tag: "Func", params: [ { name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } },
+  { tag: "Func", params: [ { name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } }
+)));
+Deno.test("Func: params type not match", () => assert(!typeEq(
+  { tag: "Func", params: [ { name: "x", type: { tag: "Number"  } }], retType: { tag: "Number" } },
+  { tag: "Func", params: [ { name: "x", type: { tag: "Boolean" } }], retType: { tag: "Number" } }
+)));
+Deno.test("Func: retType not match", () => assert(!typeEq(
+  { tag: "Func", params: [ { name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } },
+  { tag: "Func", params: [ { name: "x", type: { tag: "Number" } }], retType: { tag: "Boolean" } }
+)));

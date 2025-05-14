@@ -42,6 +42,14 @@ export function typecheck(t: Term, tyEnv: TypeEnv): Type {
       if (rightTy.tag !== "Number") throw "number expected";
       return { tag: "Number" };
     }
+    case "var": {
+      if (tyEnv[t.name] === undefined) throw "variable not found";
+      return tyEnv[t.name];
+    }
+    case "func": {
+      const retType = typecheck(t.body, tyEnv);
+      return { tag: "Func", params: t.params, retType };
+    }
     default: {
       throw "not implemented yet";
       // const _exhaustiveCheck: never = t;

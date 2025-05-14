@@ -17,26 +17,28 @@ type Term =
 
 type Param = { name: string; type: Type };
 
-export function typecheck(t: Term): Type {
+type TypeEnv = Record<string, Type>;
+
+export function typecheck(t: Term, tyEnv: TypeEnv): Type {
   switch (t.tag) {
     case "true":
       return { tag: "Boolean" };
     case "false":
       return { tag: "Boolean" };
     case "if": {
-      const condTy = typecheck(t.cond);
+      const condTy = typecheck(t.cond, tyEnv);
       if (condTy.tag !== "Boolean") throw "boolean expected";
-      const thnTy = typecheck(t.thn);
-      const elsTy = typecheck(t.els);
+      const thnTy = typecheck(t.thn, tyEnv);
+      const elsTy = typecheck(t.els, tyEnv);
       if (thnTy.tag !== elsTy.tag) throw "then and else have different types";
       return thnTy;
     }
     case "number":
       return { tag: "Number" };
     case "add": {
-      const leftTy = typecheck(t.left);
+      const leftTy = typecheck(t.left, tyEnv);
       if (leftTy.tag !== "Number") throw "number expected";
-      const rightTy = typecheck(t.right);
+      const rightTy = typecheck(t.right, tyEnv);
       if (rightTy.tag !== "Number") throw "number expected";
       return { tag: "Number" };
     }

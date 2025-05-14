@@ -6,7 +6,7 @@ const source = (strings: TemplateStringsArray) => strings.join('').replaceAll(/\
 
 const expectResult = (expected: Type) => {
   return (context: Deno.TestContext) => {
-    const result = typecheck(parseBasic(context.name));
+    const result = typecheck(parseBasic(context.name), {});
     assertEquals(result, expected);
   }
 }
@@ -14,7 +14,7 @@ const expectResult = (expected: Type) => {
 const expectThrow = (expected: string) => {
   return (context: Deno.TestContext) => {
     try {
-      typecheck(parseBasic(context.name));
+      typecheck(parseBasic(context.name), {});
     } catch (e) {
       assertEquals(e, expected);
       return;

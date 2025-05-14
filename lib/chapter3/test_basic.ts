@@ -65,3 +65,7 @@ Deno.test("Func: retType not match", () => assert(!typeEq(
   { tag: "Func", params: [ { name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } },
   { tag: "Func", params: [ { name: "x", type: { tag: "Number" } }], retType: { tag: "Boolean" } }
 )));
+Deno.test("Func: param name mismatch is not cared", () => assert(typeEq(
+  { tag: "Func", params: [ { name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } },
+  { tag: "Func", params: [ { name: "y", type: { tag: "Number" } }], retType: { tag: "Number" } }
+)));

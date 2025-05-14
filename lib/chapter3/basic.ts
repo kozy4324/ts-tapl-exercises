@@ -47,7 +47,11 @@ export function typecheck(t: Term, tyEnv: TypeEnv): Type {
       return tyEnv[t.name];
     }
     case "func": {
-      const retType = typecheck(t.body, tyEnv);
+      const newTyEnv = { ...tyEnv };
+      for (const { name, type } of t.params) {
+        newTyEnv[name] = type;
+      }
+      const retType = typecheck(t.body, newTyEnv);
       return { tag: "Func", params: t.params, retType };
     }
     default: {

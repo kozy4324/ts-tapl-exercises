@@ -1,4 +1,4 @@
-import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import { assert, assertEquals, assertThrows } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { parseBasic } from "npm:tiny-ts-parser";
 import { typecheck, Type, typeEq } from "./basic.ts";
 
@@ -13,13 +13,9 @@ const expectResult = (expected: Type) => {
 
 const expectThrow = (expected: string) => {
   return (context: Deno.TestContext) => {
-    try {
+    assertThrows(() => {
       typecheck(parseBasic(context.name), {});
-    } catch (e) {
-      assertEquals(e, expected);
-      return;
-    }
-    assert(false, `Expected error: ${expected}`);
+    }, Error, expected);
   }
 }
 

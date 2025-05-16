@@ -27,23 +27,23 @@ export function typecheck(t: Term, tyEnv: TypeEnv): Type {
       return { tag: "Boolean" };
     case "if": {
       const condTy = typecheck(t.cond, tyEnv);
-      if (condTy.tag !== "Boolean") throw "boolean expected";
+      if (condTy.tag !== "Boolean") throw new Error("boolean expected");
       const thnTy = typecheck(t.thn, tyEnv);
       const elsTy = typecheck(t.els, tyEnv);
-      if (thnTy.tag !== elsTy.tag) throw "then and else have different types";
+      if (thnTy.tag !== elsTy.tag) throw new Error("then and else have different types");
       return thnTy;
     }
     case "number":
       return { tag: "Number" };
     case "add": {
       const leftTy = typecheck(t.left, tyEnv);
-      if (leftTy.tag !== "Number") throw "number expected";
+      if (leftTy.tag !== "Number") throw new Error("number expected");
       const rightTy = typecheck(t.right, tyEnv);
-      if (rightTy.tag !== "Number") throw "number expected";
+      if (rightTy.tag !== "Number") throw new Error("number expected");
       return { tag: "Number" };
     }
     case "var": {
-      if (tyEnv[t.name] === undefined) throw "variable not found";
+      if (tyEnv[t.name] === undefined) throw new Error("variable not found");
       return tyEnv[t.name];
     }
     case "func": {
@@ -55,7 +55,7 @@ export function typecheck(t: Term, tyEnv: TypeEnv): Type {
       return { tag: "Func", params: t.params, retType };
     }
     default: {
-      throw "not implemented yet";
+      throw new Error("not implemented yet");
       // const _exhaustiveCheck: never = t;
       // throw new Error("unreachable:" + _exhaustiveCheck)
     }

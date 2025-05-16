@@ -38,3 +38,12 @@ Deno.test("true ? false : true", expectResult({ tag: "Boolean" }));
 Deno.test("1 ? 2 : 3", expectThrow("boolean expected"));
 Deno.test("true ? 1 : true", expectThrow("then and else have different types"));
 Deno.test("true ? (1 + 2) : (3 + (false ? 4 : 5))", expectResult({ tag: "Number" }));
+
+# Deno.test("->(x) { 42 }", expectResult({ tag: "Func", params: [{ name: "x", type: { tag: "Boolean" } }], retType: { tag: "Number" } }));
+# Deno.test("->(x) { x }", expectResult({ tag: "Func", params: [{ name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } }));
+# Deno.test("->(x, y) { x + y }", expectResult({ tag: "Func", params: [{ name: "x", type: { tag: "Number" } }, { name: "y", type: { tag: "Number" } }], retType: { tag: "Number" } }));
+# Deno.test("->(x, y) { x + z }", expectThrow("variable not found"));
+# Deno.test("(->(x) { x }).call(42)", expectResult({ tag: "Number" }));
+# Deno.test("(->(x) { x }).call(true)", expectThrow("argument type mismatch"));
+# Deno.test("(->(x) { 42 }).call(1, 2, 3);", expectThrow("wrong number of arguments"));
+# Deno.test("->(f) { 1 }", expectResult({ tag: "Func", params: [{ name: "f", type: { tag: "Func", params: [{ name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } } }], retType: { tag: "Number" } }));

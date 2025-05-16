@@ -2,8 +2,6 @@ import { assert, assertEquals, assertThrows } from "https://deno.land/std@0.224.
 import { parseBasic } from "npm:tiny-ts-parser";
 import { typecheck, Type, typeEq } from "./basic.ts";
 
-const source = (strings: TemplateStringsArray) => strings.join('').replaceAll(/\s*\n\s*/g, ' ').trim();
-
 const expectResult = (expected: Type) => {
   return (context: Deno.TestContext) => {
     const result = typecheck(parseBasic(context.name), {});
@@ -36,14 +34,6 @@ Deno.test("( (x: number) => x )(42);", expectResult({ tag: "Number" }));
 Deno.test("( (x: number) => x )(true);", expectThrow("argument type mismatch"));
 Deno.test("( (x: number) => 42 )(1, 2, 3);", expectThrow("wrong number of arguments"));
 Deno.test("(f: (x: number) => number) => 1", expectResult({ tag: "Func", params: [{ name: "f", type: { tag: "Func", params: [{ name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } } }], retType: { tag: "Number" } }));
-/*
-Deno.test(source`
-  const add = (x: number, y: number) => x + y;
-  const select = (b: boolean, x: number, y: number) => b ? x : y;
-  const x = add(1, add(2, 3));
-  select(true, x, x);
-`, expectResult({ tag: "Func", params: [], retType: { tag: "Number" } }));
-*/
 
 Deno.test("Boolean vs Boolean", () => assert(typeEq({ tag: "Boolean" }, { tag: "Boolean" })));
 Deno.test("Number vs Number", () => assert(typeEq({ tag: "Number" }, { tag: "Number" })));

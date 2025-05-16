@@ -1,0 +1,10 @@
+# Generated from lib/chapter3/basic.rb with RBS::Inline
+
+module Chapter3
+  class Checker
+    # : (TinyRbParser::Term) -> typ
+    def self.typecheck: (TinyRbParser::Term) -> typ
+  end
+end
+
+type Chapter3::typ = { tag: "Boolean" } | { tag: "Number" }

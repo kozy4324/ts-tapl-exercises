@@ -32,6 +32,10 @@ Deno.test("(x: boolean) => 42;", expectResult({ tag: "Func", params: [{ name: "x
 Deno.test("(x: number) => x;", expectResult({ tag: "Func", params: [{ name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } }));
 Deno.test("(x: number, y: number) => x + y;", expectResult({ tag: "Func", params: [{ name: "x", type: { tag: "Number" } }, { name: "y", type: { tag: "Number" } }], retType: { tag: "Number" } }));
 Deno.test("(x: number, y: number) => x + z;", expectThrow("variable not found"));
+Deno.test("( (x: number) => x )(42);", expectResult({ tag: "Number" }));
+Deno.test("( (x: number) => x )(true);", expectThrow("argument type mismatch"));
+Deno.test("( (x: number) => 42 )(1, 2, 3);", expectThrow("wrong number of arguments"));
+Deno.test("(f: (x: number) => number) => 1", expectResult({ tag: "Func", params: [{ name: "f", type: { tag: "Func", params: [{ name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } } }], retType: { tag: "Number" } }));
 /*
 Deno.test(source`
   const add = (x: number, y: number) => x + y;

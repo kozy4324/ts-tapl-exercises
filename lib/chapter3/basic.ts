@@ -54,6 +54,18 @@ export function typecheck(t: Term, tyEnv: TypeEnv): Type {
       const retType = typecheck(t.body, newTyEnv);
       return { tag: "Func", params: t.params, retType };
     }
+    case "call": {
+      const funcTy = typecheck(t.func, tyEnv);
+      if (funcTy.tag !== "Func") throw new Error("function type expected");
+      if (funcTy.params.length !== t.args.length) throw new Error("wrong number of arguments");
+      for (let i = 0; i < t.args.length; i++) {
+        const argTy = typecheck(t.args[i], tyEnv);
+        if (!typeEq(argTy, funcTy.params[i].type)) {
+          throw new Error("argument type mismatch");
+        }
+      }
+      return funcTy.retType;
+    }
     default: {
       throw new Error("not implemented yet");
       // const _exhaustiveCheck: never = t;

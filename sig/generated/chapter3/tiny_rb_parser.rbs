@@ -38,10 +38,33 @@ module Chapter3
       def initialize: (left: Term, right: Term) -> void
     end
 
+    class FuncTerm < Term
+      attr_accessor params: Array[Param]
+
+      attr_accessor body: Term
+
+      # : (params: Array[Param], body: Term) -> void
+      def initialize: (params: Array[Param], body: Term) -> void
+    end
+
+    class Param
+      attr_accessor name: String
+
+      attr_accessor type: typ
+
+      # : (name: String, type: typ) -> void
+      def initialize: (name: String, type: typ) -> void
+    end
+
+    # : (Prism::node, String) -> String
+    def self.retrieve_comment: (Prism::node, String) -> String
+
     # : (String) -> Term
     def self.parse: (String) -> Term
 
-    # : (Prism::node) -> Term
-    def self.term: (Prism::node) -> Term
+    # : (Prism::node, String) -> Term
+    def self.term: (Prism::node, String) -> Term
   end
 end
+
+type Chapter3::typ = { tag: "Boolean" } | { tag: "Number" } | { tag: "Func", params: Array[Chapter3::TinyRbParser::Param], body: typ }

@@ -2,10 +2,6 @@
 
 require_relative "./tiny_rb_parser"
 
-# @rbs!
-#   type Chapter3::typ = { tag: "Boolean" }
-#                      | { tag: "Number" }
-
 module Chapter3
   class Checker
     #: (TinyRbParser::Term) -> typ

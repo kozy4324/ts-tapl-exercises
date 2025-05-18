@@ -59,8 +59,8 @@ module Chapter3
     # : (untyped) -> Chapter3::typ
     def self.to_typ: (untyped) -> Chapter3::typ
 
-    # : (Prism::node, Prism::ParseResult) -> { param_typs: Array[Chapter3::typ], return_typ: Chapter3::typ | nil }
-    def self.type_def: (Prism::node, Prism::ParseResult) -> { param_typs: Array[Chapter3::typ], return_typ: Chapter3::typ | nil }
+    # : (Integer, Prism::ParseResult) -> { param_typs: Array[Chapter3::typ], return_typ: Chapter3::typ | nil }
+    def self.type_def: (Integer, Prism::ParseResult) -> { param_typs: Array[Chapter3::typ], return_typ: Chapter3::typ | nil }
 
     # : (String) -> Term
     def self.parse: (String) -> Term

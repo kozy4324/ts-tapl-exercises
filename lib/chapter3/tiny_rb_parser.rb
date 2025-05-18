@@ -84,10 +84,10 @@ module Chapter3
       h
     end
 
-    #: (Prism::node, Prism::ParseResult) -> { param_typs: Array[Chapter3::typ], return_typ: Chapter3::typ | nil }
-    def self.type_def(node, parse_result)
+    #: (Integer, Prism::ParseResult) -> { param_typs: Array[Chapter3::typ], return_typ: Chapter3::typ | nil }
+    def self.type_def(node_location_start_line, parse_result)
       rbs_result = RBS::Inline::AnnotationParser.parse(parse_result.comments)
-      parsing_result = rbs_result.find {|r| r.comments.first.location.start_line == node.location.start_line - 1}
+      parsing_result = rbs_result.find {|r| r.comments.first.location.start_line == node_location_start_line - 1}
       return { param_typs: [], return_typ: nil } if parsing_result.nil?
       annotation = parsing_result.annotations.first
       return { param_typs: [], return_typ: nil } unless annotation.is_a? RBS::Inline::AST::Annotations::MethodTypeAssertion
@@ -100,22 +100,27 @@ module Chapter3
           to_typ({ tag: "Boolean" })
         when "Integer"
           to_typ({ tag: "Number" })
-        # when "^(Integer) -> bool"
-        #   TODO: Function型どうしよう...？再帰的に処理する必要がある？
+        when /^\^.*/
+          param_type_def = type_def(2, Prism.parse("#: #{param.type.to_s[1..]}"))
+          to_typ({ tag: "Func", params: param_type_def[:param_typs].map {|typ| Param.new(name: "_", type: typ) }, body: param_type_def[:return_typ] })
         else
           raise "Unknown annotation type"
         end
       end
-      # unused...
-      # return_typ = case method_type.return_type.to_s
-      #              when "bool"
-      #                to_typ({ tag: "Boolean" })
-      #              when "Integer"
-      #                to_typ({ tag: "Number" })
-      #              else
-      #                raise "Unknown annotation type"
-      #              end
-      { param_typs: param_typs, return_typ: nil }
+      return_typ = case method_type.return_type.to_s
+                   when "void"
+                     nil
+                   when "bool"
+                     to_typ({ tag: "Boolean" })
+                   when "Integer"
+                     to_typ({ tag: "Number" })
+                   when /^\^.*/
+                     param_type_def = type_def(2, Prism.parse("#: #{method_type.return_type.to_s[1..]}"))
+                     to_typ({ tag: "Func", params: param_type_def[:param_typs].map {|typ| Param.new(name: "x", type: typ) }, body: param_type_def[:return_typ] })
+                   else
+                     raise "Unknown annotation type"
+                   end
+      { param_typs: param_typs, return_typ: return_typ }
     end
 
     #: (String) -> Term
@@ -156,7 +161,7 @@ module Chapter3
         bodyNode = statements.body.first or raise "Unknown node type"
         term(bodyNode, result)
       when node.is_a?(Prism::LambdaNode)
-        type_def = type_def(node, result)
+        type_def = type_def(node.location.start_line, result)
         statements_node = node.body
         raise "Unknown node type" unless statements_node.is_a?(Prism::StatementsNode)
         statement_node = statements_node.body.first
@@ -181,6 +186,6 @@ module Chapter3
 end
 
 puts Chapter3::TinyRbParser.parse(<<SOURCE).inspect
-#: (^(Integer) -> bool) -> void
+#: (^(Integer, bool) -> bool) -> void
 -> (a) { 1 }
 SOURCE

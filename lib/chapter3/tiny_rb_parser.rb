@@ -96,6 +96,8 @@ module Chapter3
       params = method_type.required_positionals
       param_typs = params.map do |param|
         case param.type.to_s
+        when "bool"
+          to_typ({ tag: "Boolean" })
         when "Integer"
           to_typ({ tag: "Number" })
         else
@@ -104,6 +106,8 @@ module Chapter3
       end
       # unused...
       # return_typ = case method_type.return_type.to_s
+      #              when "bool"
+      #                to_typ({ tag: "Boolean" })
       #              when "Integer"
       #                to_typ({ tag: "Number" })
       #              else
@@ -175,6 +179,6 @@ module Chapter3
 end
 
 puts Chapter3::TinyRbParser.parse(<<SOURCE).inspect
-#: (Integer, Integer) -> void
--> (x, y) { 1 + 2 }
+#: (bool, Integer, Integer) -> void
+-> (b, x, y) { 1 + 2 }
 SOURCE

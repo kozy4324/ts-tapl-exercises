@@ -100,6 +100,8 @@ module Chapter3
           to_typ({ tag: "Boolean" })
         when "Integer"
           to_typ({ tag: "Number" })
+        # when "^(Integer) -> bool"
+        #   TODO: Function型どうしよう...？再帰的に処理する必要がある？
         else
           raise "Unknown annotation type"
         end
@@ -179,6 +181,6 @@ module Chapter3
 end
 
 puts Chapter3::TinyRbParser.parse(<<SOURCE).inspect
-#: (bool, Integer, Integer) -> void
--> (b, x, y) { 1 + 2 }
+#: (^(Integer) -> bool) -> void
+-> (a) { 1 }
 SOURCE

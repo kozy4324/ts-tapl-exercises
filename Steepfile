@@ -5,4 +5,6 @@ target :app do
   ignore "lib/**/test_*.rb"
 
   library "prism"
+  library "rbs"
+  library "rbs-inline"
 end

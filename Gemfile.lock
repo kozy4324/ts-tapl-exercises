@@ -100,6 +100,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  prism (= 1.2.0)
   rbs-inline
   steep
 

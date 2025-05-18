@@ -6,9 +6,9 @@ end
 task :default => [:rbs, :chapter2, :chapter3]
 
 task :chapter2 => ["rbs"] do
-  sh "ruby lib/chapter2/test_arith.rb"
+  sh "bundle exec ruby lib/chapter2/test_arith.rb"
 end
 
 task :chapter3 => ["rbs"] do
-  sh "ruby lib/chapter3/test_basic.rb"
+  sh "bundle exec ruby lib/chapter3/test_basic.rb"
 end

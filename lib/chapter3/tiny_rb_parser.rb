@@ -1,6 +1,7 @@
 # rbs_inline: enabled
 
 require "prism"
+require "rbs/inline"
 
 # chapter3 で追加される構文
 # 変数参照
@@ -78,10 +79,37 @@ module Chapter3
       end
     end
 
-    #: (Prism::node, String) -> String
-    def self.retrieve_comment(node, source)
-      line = node.location.start_line
-      source.split("\n")[line - 2].gsub(/#:/, "").strip
+    #: (untyped) -> Chapter3::typ
+    def self.to_typ(h)
+      h
+    end
+
+    #: (Prism::node, Prism::ParseResult) -> { param_typs: Array[Chapter3::typ], return_typ: Chapter3::typ | nil }
+    def self.type_def(node, parse_result)
+      rbs_result = RBS::Inline::AnnotationParser.parse(parse_result.comments)
+      parsing_result = rbs_result.find {|r| r.comments.first.location.start_line == node.location.start_line - 1}
+      return { param_typs: [], return_typ: nil } if parsing_result.nil?
+      annotation = parsing_result.annotations.first
+      return { param_typs: [], return_typ: nil } unless annotation.is_a? RBS::Inline::AST::Annotations::MethodTypeAssertion
+      method_type = annotation.method_type.type
+      return { param_typs: [], return_typ: nil } unless method_type.is_a? RBS::Types::Function
+      params = method_type.required_positionals
+      param_typs = params.map do |param|
+        case param.type.to_s
+        when "Integer"
+          to_typ({ tag: "Number" })
+        else
+          raise "Unknown annotation type"
+        end
+      end
+      # unused...
+      # return_typ = case method_type.return_type.to_s
+      #              when "Integer"
+      #                to_typ({ tag: "Number" })
+      #              else
+      #                raise "Unknown annotation type"
+      #              end
+      { param_typs: param_typs, return_typ: nil }
     end
 
     #: (String) -> Term
@@ -91,14 +119,13 @@ module Chapter3
       nodes = statements.body # Array[Prism::node]
       node = nodes.first # Prism::node
 
-      # puts retrieve_comment(node, source)
-      term(node, source)
+      term(node, result)
     rescue RuntimeError => e
       raise "#{e.message}; source => #{source}"
     end
 
-    #: (Prism::node, String) -> Term
-    def self.term(node, source)
+    #: (Prism::node, Prism::ParseResult) -> Term
+    def self.term(node, result)
       case
       when node.is_a?(Prism::TrueNode)
         TrueTerm.new
@@ -109,35 +136,36 @@ module Chapter3
         subsequent = node.subsequent or raise "Unknown node type"
         raise "Unknown node type" unless subsequent.is_a?(Prism::ElseNode)
         elsNode = subsequent.statements&.body&.first or raise "Unknown node type"
-        IfTerm.new(cond: term(node.predicate, source), thn: term(statements.body.first, source), els: term(elsNode, source))
+        IfTerm.new(cond: term(node.predicate, result), thn: term(statements.body.first, result), els: term(elsNode, result))
       when node.is_a?(Prism::IntegerNode)
         NumberTerm.new(n: node.value)
       when node.is_a?(Prism::CallNode)
         leftNode = node.receiver
         raise "Unknown node type" unless leftNode.is_a?(Prism::IntegerNode) && node.name == :+
         rightNode = node.arguments&.arguments&.first or raise "Unknown node type"
-        AddTerm.new(left: term(leftNode, source), right: term(rightNode, source))
+        AddTerm.new(left: term(leftNode, result), right: term(rightNode, result))
       when node.is_a?(Prism::ParenthesesNode)
         statements = node.body
         raise "Unknown node type" unless statements.is_a?(Prism::StatementsNode)
         bodyNode = statements.body.first or raise "Unknown node type"
-        term(bodyNode, source)
+        term(bodyNode, result)
       when node.is_a?(Prism::LambdaNode)
+        type_def = type_def(node, result)
         statements_node = node.body
         raise "Unknown node type" unless statements_node.is_a?(Prism::StatementsNode)
         statement_node = statements_node.body.first
         if node.parameters.nil?
-          FuncTerm.new(params: [], body: term(statement_node, source))
+          FuncTerm.new(params: [], body: term(statement_node, result))
         else
           block_parameters_node = node.parameters
           raise "Unknown node type" unless block_parameters_node.is_a?(Prism::BlockParametersNode)
           paramters_node = block_parameters_node.parameters
           raise "Unknown node type" unless paramters_node.is_a?(Prism::ParametersNode)
-          params = paramters_node.requireds.map do |required_paramter_node|
+          params = paramters_node.requireds.map.with_index do |required_paramter_node, idx|
             raise "Unknown node type" unless required_paramter_node.is_a?(Prism::RequiredParameterNode)
-            Param.new(name: required_paramter_node.name.to_s, type: { tag: "Number" }) # TODO: 引数の型を解決する
+            Param.new(name: required_paramter_node.name.to_s, type: type_def[:param_typs][idx])
           end
-          FuncTerm.new(params: params, body: term(statement_node, source))
+          FuncTerm.new(params: params, body: term(statement_node, result))
         end
       else
         raise "Unknown node type; node => #{node.class}"
@@ -146,7 +174,7 @@ module Chapter3
   end
 end
 
-puts Chapter3::TinyRbParser.parse(<<CODE).inspect
-#: (Integer) -> Integer
--> (x) { 1 + 2 }
-CODE
+puts Chapter3::TinyRbParser.parse(<<SOURCE).inspect
+#: (Integer, Integer) -> void
+-> (x, y) { 1 + 2 }
+SOURCE

@@ -59,6 +59,14 @@ module Chapter3
       end
     end
 
+    class VarTerm < Term
+      attr_accessor :name #: String
+      #: (params: name: String) -> void
+      def initialize(name:)
+        @name = name
+      end
+    end
+
     class FuncTerm < Term
       attr_accessor :params #: Array[Param]
       attr_accessor :body #: Term
@@ -160,6 +168,8 @@ module Chapter3
         raise "Unknown node type" unless statements.is_a?(Prism::StatementsNode)
         bodyNode = statements.body.first or raise "Unknown node type"
         term(bodyNode, result)
+      when node.is_a?(Prism::LocalVariableReadNode)
+        VarTerm.new(name: node.name.to_s)
       when node.is_a?(Prism::LambdaNode)
         type_def = type_def(node.location.start_line, result)
         statements_node = node.body
@@ -186,6 +196,5 @@ module Chapter3
 end
 
 puts Chapter3::TinyRbParser.parse(<<SOURCE).inspect
-#: (^(Integer, bool) -> bool) -> void
--> (a) { 1 }
+-> (a) { a }
 SOURCE

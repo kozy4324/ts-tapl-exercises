@@ -38,6 +38,13 @@ module Chapter3
       def initialize: (left: Term, right: Term) -> void
     end
 
+    class VarTerm < Term
+      attr_accessor name: String
+
+      # : (params: name: String) -> void
+      def initialize: (name: untyped) -> untyped
+    end
+
     class FuncTerm < Term
       attr_accessor params: Array[Param]
 

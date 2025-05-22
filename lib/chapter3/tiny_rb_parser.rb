@@ -194,7 +194,3 @@ module Chapter3
     end
   end
 end
-
-puts Chapter3::TinyRbParser.parse(<<SOURCE).inspect
--> (a) { a }
-SOURCE

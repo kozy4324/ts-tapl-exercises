@@ -87,6 +87,17 @@ module Chapter3
       end
     end
 
+    class CallTerm < Term
+      attr_accessor :func #: Term
+      attr_accessor :args #: Array[Term]
+      #: (func: Term, args: Array[Term]) -> void
+      def initialize(func:, args:)
+        @func = func
+        @args = args
+      end
+    end
+
+
     #: (untyped) -> Chapter3::typ
     def self.to_typ(h)
       h
@@ -160,9 +171,14 @@ module Chapter3
         NumberTerm.new(n: node.value)
       when node.is_a?(Prism::CallNode)
         leftNode = node.receiver
-        raise "Unknown node type" unless leftNode.is_a?(Prism::IntegerNode) && node.name == :+
-        rightNode = node.arguments&.arguments&.first or raise "Unknown node type"
-        AddTerm.new(left: term(leftNode, result), right: term(rightNode, result))
+        raise "Unknown node type" unless (leftNode.is_a?(Prism::IntegerNode) && node.name == :+) || node.name == :call
+        if leftNode.is_a?(Prism::IntegerNode)
+          rightNode = node.arguments&.arguments&.first or raise "Unknown node type"
+          AddTerm.new(left: term(leftNode, result), right: term(rightNode, result))
+        else
+          raise "Unknown node type" if leftNode.nil?
+          CallTerm.new(func: term(leftNode, result), args: [])
+        end
       when node.is_a?(Prism::ParenthesesNode)
         statements = node.body
         raise "Unknown node type" unless statements.is_a?(Prism::StatementsNode)

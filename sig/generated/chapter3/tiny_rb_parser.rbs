@@ -63,6 +63,15 @@ module Chapter3
       def initialize: (name: String, type: typ) -> void
     end
 
+    class CallTerm < Term
+      attr_accessor func: Term
+
+      attr_accessor args: Array[Term]
+
+      # : (func: Term, args: Array[Term]) -> void
+      def initialize: (func: Term, args: Array[Term]) -> void
+    end
+
     # : (untyped) -> Chapter3::typ
     def self.to_typ: (untyped) -> Chapter3::typ
 

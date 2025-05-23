@@ -8,15 +8,15 @@ class << self
 end
 self.assertions = 0
 
-def assert_parse_result(source, cls)
-  assert_equal(Chapter3::TinyRbParser.parse(source).class, cls)
+def parse(source)
+  Chapter3::TinyRbParser.parse(source)
 end
 
-assert_parse_result('true', Chapter3::TinyRbParser::TrueTerm)
-assert_parse_result('false', Chapter3::TinyRbParser::FalseTerm)
-assert_parse_result('true ? 1 : 2', Chapter3::TinyRbParser::IfTerm)
-assert_parse_result('1', Chapter3::TinyRbParser::NumberTerm)
-assert_parse_result('1 + 2', Chapter3::TinyRbParser::AddTerm)
-assert_parse_result('-> { 1 }', Chapter3::TinyRbParser::FuncTerm)
-assert_equal(Chapter3::TinyRbParser.parse('->(a) { a }').body.class, Chapter3::TinyRbParser::VarTerm)
-assert_parse_result('-> { 1 }.call', Chapter3::TinyRbParser::CallTerm)
+assert_equal(parse('true').class, Chapter3::TinyRbParser::TrueTerm)
+assert_equal(parse('false').class, Chapter3::TinyRbParser::FalseTerm)
+assert_equal(parse('true ? 1 : 2').class, Chapter3::TinyRbParser::IfTerm)
+assert_equal(parse('1').class, Chapter3::TinyRbParser::NumberTerm)
+assert_equal(parse('1 + 2').class, Chapter3::TinyRbParser::AddTerm)
+assert_equal(parse('-> { 1 }').class, Chapter3::TinyRbParser::FuncTerm)
+assert_equal(parse('->(a) { a }').body.class, Chapter3::TinyRbParser::VarTerm)
+assert_equal(parse('-> { 1 }.call').class, Chapter3::TinyRbParser::CallTerm)

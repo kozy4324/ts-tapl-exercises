@@ -177,7 +177,8 @@ module Chapter3
           AddTerm.new(left: term(leftNode, result), right: term(rightNode, result))
         else
           raise "Unknown node type" if leftNode.nil?
-          CallTerm.new(func: term(leftNode, result), args: [])
+          args = node.arguments&.arguments || []
+          CallTerm.new(func: term(leftNode, result), args: args.map { term(_1, result) })
         end
       when node.is_a?(Prism::ParenthesesNode)
         statements = node.body

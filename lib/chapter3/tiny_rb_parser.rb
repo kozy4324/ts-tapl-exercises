@@ -162,45 +162,45 @@ module Chapter3
       when node.is_a?(Prism::FalseNode)
         FalseTerm.new
       when node.is_a?(Prism::IfNode)
-        statements = node.statements or raise "Unknown node type"
-        subsequent = node.subsequent or raise "Unknown node type"
-        raise "Unknown node type" unless subsequent.is_a?(Prism::ElseNode)
-        elsNode = subsequent.statements&.body&.first or raise "Unknown node type"
+        statements = node.statements or raise "Unknown node type; node => #{node.class}"
+        subsequent = node.subsequent or raise "Unknown node type; node => #{node.class}"
+        raise "Unknown node type; node => #{node.class}" unless subsequent.is_a?(Prism::ElseNode)
+        elsNode = subsequent.statements&.body&.first or raise "Unknown node type; node => #{node.class}"
         IfTerm.new(cond: term(node.predicate, result), thn: term(statements.body.first, result), els: term(elsNode, result))
       when node.is_a?(Prism::IntegerNode)
         NumberTerm.new(n: node.value)
       when node.is_a?(Prism::CallNode)
         leftNode = node.receiver
-        raise "Unknown node type" unless (leftNode.is_a?(Prism::IntegerNode) && node.name == :+) || node.name == :call
+        raise "Unknown node type; node => #{node.class}" unless (leftNode.is_a?(Prism::IntegerNode) && node.name == :+) || node.name == :call
         if leftNode.is_a?(Prism::IntegerNode)
-          rightNode = node.arguments&.arguments&.first or raise "Unknown node type"
+          rightNode = node.arguments&.arguments&.first or raise "Unknown node type; node => #{node.class}"
           AddTerm.new(left: term(leftNode, result), right: term(rightNode, result))
         else
-          raise "Unknown node type" if leftNode.nil?
+          raise "Unknown node type; node => #{node.class}" if leftNode.nil?
           args = node.arguments&.arguments || []
           CallTerm.new(func: term(leftNode, result), args: args.map { term(_1, result) })
         end
       when node.is_a?(Prism::ParenthesesNode)
         statements = node.body
-        raise "Unknown node type" unless statements.is_a?(Prism::StatementsNode)
-        bodyNode = statements.body.first or raise "Unknown node type"
+        raise "Unknown node type; node => #{node.class}" unless statements.is_a?(Prism::StatementsNode)
+        bodyNode = statements.body.first or raise "Unknown node type; node => #{node.class}"
         term(bodyNode, result)
       when node.is_a?(Prism::LocalVariableReadNode)
         VarTerm.new(name: node.name.to_s)
       when node.is_a?(Prism::LambdaNode)
         type_def = type_def(node.location.start_line, result)
         statements_node = node.body
-        raise "Unknown node type" unless statements_node.is_a?(Prism::StatementsNode)
+        raise "Unknown node type; node => #{node.class}" unless statements_node.is_a?(Prism::StatementsNode)
         statement_node = statements_node.body.first
         if node.parameters.nil?
           FuncTerm.new(params: [], body: term(statement_node, result))
         else
           block_parameters_node = node.parameters
-          raise "Unknown node type" unless block_parameters_node.is_a?(Prism::BlockParametersNode)
+          raise "Unknown node type; node => #{node.class}" unless block_parameters_node.is_a?(Prism::BlockParametersNode)
           paramters_node = block_parameters_node.parameters
-          raise "Unknown node type" unless paramters_node.is_a?(Prism::ParametersNode)
+          raise "Unknown node type; node => #{node.class}" unless paramters_node.is_a?(Prism::ParametersNode)
           params = paramters_node.requireds.map.with_index do |required_paramter_node, idx|
-            raise "Unknown node type" unless required_paramter_node.is_a?(Prism::RequiredParameterNode)
+            raise "Unknown node type; node => #{node.class}" unless required_paramter_node.is_a?(Prism::RequiredParameterNode)
             Param.new(name: required_paramter_node.name.to_s, type: type_def[:param_typs][idx])
           end
           FuncTerm.new(params: params, body: term(statement_node, result))

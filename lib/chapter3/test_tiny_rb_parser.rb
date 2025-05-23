@@ -27,3 +27,7 @@ assert_equal(parse('->(a) { a }.call(true)').args.first.class, Chapter3::TinyRbP
 assert_equal(parse('->(a, b) { 1 + 2 }.call(1, 2)').args.size, 2)
 assert_equal(parse('->(a, b) { 1 + 2 }.call(1, 2)').args[0].class, Chapter3::TinyRbParser::NumberTerm)
 assert_equal(parse('->(a, b) { 1 + 2 }.call(1, 2)').args[1].class, Chapter3::TinyRbParser::NumberTerm)
+assert_equal(parse('->(a, b) { a + b }.call(1, 2)').class, Chapter3::TinyRbParser::CallTerm)
+assert_equal(parse('->(a, b) { a + b }').body.class, Chapter3::TinyRbParser::AddTerm)
+assert_equal(parse('->(a, b) { a + b }').body.left.class, Chapter3::TinyRbParser::VarTerm)
+assert_equal(parse('->(a, b) { a + b }').body.right.class, Chapter3::TinyRbParser::VarTerm)

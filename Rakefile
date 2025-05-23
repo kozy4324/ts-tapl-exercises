@@ -10,5 +10,6 @@ task :chapter2 => ["rbs"] do
 end
 
 task :chapter3 => ["rbs"] do
+  sh "bundle exec ruby lib/chapter3/test_tiny_rb_parser.rb"
   sh "bundle exec ruby lib/chapter3/test_basic.rb"
 end

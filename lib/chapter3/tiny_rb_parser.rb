@@ -171,12 +171,12 @@ module Chapter3
         NumberTerm.new(n: node.value)
       when node.is_a?(Prism::CallNode)
         leftNode = node.receiver
-        raise "Unknown node type; node => #{node.class}" unless (leftNode.is_a?(Prism::IntegerNode) && node.name == :+) || node.name == :call
-        if leftNode.is_a?(Prism::IntegerNode)
+        raise "Unknown node type; node => #{node.class}" if leftNode.nil?
+        raise "Unknown node type; node => #{node.class}" unless node.name == :+ || node.name == :call
+        if node.name == :+
           rightNode = node.arguments&.arguments&.first or raise "Unknown node type; node => #{node.class}"
           AddTerm.new(left: term(leftNode, result), right: term(rightNode, result))
         else
-          raise "Unknown node type; node => #{node.class}" if leftNode.nil?
           args = node.arguments&.arguments || []
           CallTerm.new(func: term(leftNode, result), args: args.map { term(_1, result) })
         end

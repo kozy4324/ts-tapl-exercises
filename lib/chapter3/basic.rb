@@ -26,6 +26,9 @@ module Chapter3
         rightTy = typecheck(t.right)
         raise "number expected" if rightTy[:tag] != "Number"
         { tag: "Number" }
+      # TODO: when t.is_a?(TinyRbParser::VarTerm)
+      # TODO: when t.is_a?(TinyRbParser::FuncTerm)
+      # TODO: when t.is_a?(TinyRbParser::CallTerm)
       else
         raise "not implemented"
       end

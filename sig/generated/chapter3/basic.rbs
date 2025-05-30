@@ -2,10 +2,12 @@
 
 module Chapter3
   class Checker
-    # : (TinyRbParser::Term) -> typ
-    def self.typecheck: (TinyRbParser::Term) -> typ
+    # : (Chapter3::TinyRbParser::Term, Chapter3::typeEnv) -> Chapter3::typ
+    def self.typecheck: (Chapter3::TinyRbParser::Term, Chapter3::typeEnv) -> Chapter3::typ
 
     # : (Chapter3::typ, Chapter3::typ) -> bool
     def self.typeEq: (Chapter3::typ, Chapter3::typ) -> bool
   end
 end
+
+type Chapter3::typeEnv = Hash[String, Chapter3::typ]

@@ -2,28 +2,31 @@
 
 require_relative "./tiny_rb_parser"
 
+# @rbs!
+#   type Chapter3::typeEnv = Hash[String, Chapter3::typ]
+
 module Chapter3
   class Checker
-    #: (TinyRbParser::Term) -> typ
-    def self.typecheck(t)
+    #: (Chapter3::TinyRbParser::Term, Chapter3::typeEnv) -> Chapter3::typ
+    def self.typecheck(t, tyEnv)
       case
       when t.is_a?(TinyRbParser::TrueTerm)
         { tag: "Boolean" }
       when t.is_a?(TinyRbParser::FalseTerm)
         { tag: "Boolean" }
       when t.is_a?(TinyRbParser::IfTerm)
-        condTy = typecheck(t.cond)
+        condTy = typecheck(t.cond, tyEnv)
         raise "boolean expected" if condTy[:tag] != "Boolean"
-        thnTy = typecheck(t.thn)
-        elsTy = typecheck(t.els)
+        thnTy = typecheck(t.thn, tyEnv)
+        elsTy = typecheck(t.els, tyEnv)
         raise "then and else have different types" if thnTy[:tag] != elsTy[:tag]
         return thnTy
       when t.is_a?(TinyRbParser::NumberTerm)
         { tag: "Number" }
       when t.is_a?(TinyRbParser::AddTerm)
-        leftTy = typecheck(t.left)
+        leftTy = typecheck(t.left, tyEnv)
         raise "number expected" if leftTy[:tag] != "Number"
-        rightTy = typecheck(t.right)
+        rightTy = typecheck(t.right, tyEnv)
         raise "number expected" if rightTy[:tag] != "Number"
         { tag: "Number" }
       # TODO: when t.is_a?(TinyRbParser::VarTerm)

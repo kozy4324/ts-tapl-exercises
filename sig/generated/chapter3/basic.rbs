@@ -4,5 +4,8 @@ module Chapter3
   class Checker
     # : (TinyRbParser::Term) -> typ
     def self.typecheck: (TinyRbParser::Term) -> typ
+
+    # : (Chapter3::typ, Chapter3::typ) -> bool
+    def self.typeEq: (Chapter3::typ, Chapter3::typ) -> bool
   end
 end

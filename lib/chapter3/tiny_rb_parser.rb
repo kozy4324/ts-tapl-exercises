@@ -22,7 +22,7 @@ require "rbs/inline"
 # @rbs!
 #   type Chapter3::typ = { tag: "Boolean" }
 #                      | { tag: "Number" }
-#                      | { tag: "Func", params: Array[Chapter3::TinyRbParser::Param], body: typ }
+#                      | { tag: "Func", params: Array[Chapter3::TinyRbParser::Param], retType: typ }
 
 module Chapter3
   class TinyRbParser

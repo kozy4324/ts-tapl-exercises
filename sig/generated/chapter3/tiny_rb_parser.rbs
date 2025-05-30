@@ -86,4 +86,4 @@ module Chapter3
   end
 end
 
-type Chapter3::typ = { tag: "Boolean" } | { tag: "Number" } | { tag: "Func", params: Array[Chapter3::TinyRbParser::Param], body: typ }
+type Chapter3::typ = { tag: "Boolean" } | { tag: "Number" } | { tag: "Func", params: Array[Chapter3::TinyRbParser::Param], retType: typ }

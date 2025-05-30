@@ -78,3 +78,30 @@ Deno.test("true ? (1 + 2) : (3 + (false ? 4 : 5))", expectResult({ tag: "Number"
 # #: ( ^(Integer) -> void ) -> void
 # ->(f) { 1 }
 # SOURCE
+
+assert_equal(true, Chapter3::Checker.typeEq({ tag: "Boolean" }, { tag: "Boolean" }))
+assert_equal(true, Chapter3::Checker.typeEq({ tag: "Number" }, { tag: "Number" }))
+assert_equal(false, Chapter3::Checker.typeEq({ tag: "Boolean" }, { tag: "Number" }))
+assert_equal(false, Chapter3::Checker.typeEq({ tag: "Number" }, { tag: "Boolean" }))
+assert_equal(true, Chapter3::Checker.typeEq({ tag: "Func", params: [], retType: { tag: "Number" } }, { tag: "Func", params: [], retType: { tag: "Number" } }))
+assert_equal(false, Chapter3::Checker.typeEq({ tag: "Func", params: [], retType: { tag: "Number" } }, { tag: "Boolean" }))
+assert_equal(false, Chapter3::Checker.typeEq(
+  { tag: "Func", params: [ { name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } },
+  { tag: "Func", params: [                                       ], retType: { tag: "Number" } }
+))
+assert_equal(true, Chapter3::Checker.typeEq(
+  { tag: "Func", params: [ { name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } },
+  { tag: "Func", params: [ { name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } }
+))
+assert_equal(false, Chapter3::Checker.typeEq(
+  { tag: "Func", params: [ { name: "x", type: { tag: "Number"  } }], retType: { tag: "Number" } },
+  { tag: "Func", params: [ { name: "x", type: { tag: "Boolean" } }], retType: { tag: "Number" } }
+))
+assert_equal(false, Chapter3::Checker.typeEq(
+  { tag: "Func", params: [ { name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } },
+  { tag: "Func", params: [ { name: "x", type: { tag: "Number" } }], retType: { tag: "Boolean" } }
+))
+assert_equal(true, Chapter3::Checker.typeEq(
+  { tag: "Func", params: [ { name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } },
+  { tag: "Func", params: [ { name: "y", type: { tag: "Number" } }], retType: { tag: "Number" } }
+))

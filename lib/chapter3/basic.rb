@@ -29,7 +29,9 @@ module Chapter3
         rightTy = typecheck(t.right, tyEnv)
         raise "number expected" if rightTy[:tag] != "Number"
         { tag: "Number" }
-      # TODO: when t.is_a?(TinyRbParser::VarTerm)
+      when t.is_a?(TinyRbParser::VarTerm)
+        raise "unknown variable: #{t.name}" unless tyEnv.key? t.name
+        tyEnv[t.name]
       # TODO: when t.is_a?(TinyRbParser::FuncTerm)
       # TODO: when t.is_a?(TinyRbParser::CallTerm)
       else

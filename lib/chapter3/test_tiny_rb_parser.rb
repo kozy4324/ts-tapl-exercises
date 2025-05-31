@@ -46,7 +46,7 @@ assert_equal(parse(<<SOURCE).params.first.type, { tag: "Number" })
 ->(a) { a }
 SOURCE
 
-assert_equal(parse(<<SOURCE).params.first.type, { tag: "Func", params: [], body: nil })
+assert_equal(parse(<<SOURCE).params.first.type, { tag: "Func", params: [], retType: nil })
 #: ( ^() -> void ) -> void
 ->(a) { a }
 SOURCE

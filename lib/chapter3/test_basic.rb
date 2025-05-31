@@ -78,10 +78,10 @@ Deno.test(<<SOURCE, expectThrow("function type expected"));
 (true).call(1)
 SOURCE
 
-# Deno.test(<<SOURCE, expectResult({ tag: "Func", params: [{ name: "f", type: { tag: "Func", params: [{ name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } } }], retType: { tag: "Number" } }));
-# #: ( ^(Integer) -> void ) -> void
-# ->(f) { 1 }
-# SOURCE
+Deno.test(<<SOURCE, expectResult({ tag: "Func", params: [{ name: "f", type: { tag: "Func", params: [{ name: "_1", type: { tag: "Number" } }], retType: { tag: "Number" } } }], retType: { tag: "Number" } }));
+#: ( ^(Integer) -> Integer ) -> void
+->(f) { 1 }
+SOURCE
 
 assert_equal(true, Chapter3::Checker.typeEq({ tag: "Boolean" }, { tag: "Boolean" }))
 assert_equal(true, Chapter3::Checker.typeEq({ tag: "Number" }, { tag: "Number" }))

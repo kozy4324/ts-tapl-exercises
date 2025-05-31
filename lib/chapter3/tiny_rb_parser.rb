@@ -120,7 +120,7 @@ module Chapter3
           to_typ({ tag: "Number" })
         when /^\^.*/
           param_type_def = type_def(2, Prism.parse("#: #{param.type.to_s[1..]}"))
-          to_typ({ tag: "Func", params: param_type_def[:param_typs].map {|typ| Param.new(name: "_", type: typ) }, body: param_type_def[:return_typ] })
+          to_typ({ tag: "Func", params: param_type_def[:param_typs].map.with_index {|typ, index| { name: "_#{index + 1}", type: typ } }, retType: param_type_def[:return_typ] })
         else
           raise "Unknown annotation type"
         end

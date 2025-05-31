@@ -8,7 +8,7 @@ require_relative "./tiny_rb_parser"
 module Chapter3
   class Checker
     #: (Chapter3::TinyRbParser::Term, Chapter3::typeEnv) -> Chapter3::typ
-    def self.typecheck(t, tyEnv) # steep:ignore
+    def self.typecheck(t, tyEnv)
       case
       when t.is_a?(TinyRbParser::TrueTerm)
         { tag: "Boolean" }
@@ -35,7 +35,7 @@ module Chapter3
       when t.is_a?(TinyRbParser::FuncTerm)
         newTyEnv = tyEnv.dup
         t.params.each { |p| newTyEnv[p.name] = p.type }
-        { tag: "Func", params: t.params.map {|p| { name: p.name, type: p.type } }, retType: typecheck(t.body, newTyEnv ) }
+        Chapter3::TinyRbParser.to_typ({ tag: "Func", params: t.params.map {|p| { name: p.name, type: p.type } }, retType: typecheck(t.body, newTyEnv ) })
       # TODO: when t.is_a?(TinyRbParser::CallTerm)
       else
         raise "not implemented"

@@ -44,20 +44,20 @@ Deno.test(<<SOURCE, expectResult({ tag: "Func", params: [{ name: "x", type: { ta
 ->(x) { 42 }
 SOURCE
 
-# Deno.test(<<SOURCE, expectResult({ tag: "Func", params: [{ name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } }));
-# #: (Integer) -> void
-# ->(x) { x }
-# SOURCE
+Deno.test(<<SOURCE, expectResult({ tag: "Func", params: [{ name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } }));
+#: (Integer) -> void
+->(x) { x }
+SOURCE
 
-# Deno.test(<<SOURCE, expectResult({ tag: "Func", params: [{ name: "x", type: { tag: "Number" } }, { name: "y", type: { tag: "Number" } }], retType: { tag: "Number" } }));
-# #: (Integer, Integer) -> void
-# ->(x, y) { x + y }
-# SOURCE
+Deno.test(<<SOURCE, expectResult({ tag: "Func", params: [{ name: "x", type: { tag: "Number" } }, { name: "y", type: { tag: "Number" } }], retType: { tag: "Number" } }));
+#: (Integer, Integer) -> void
+->(x, y) { x + y }
+SOURCE
 
-# Deno.test(<<SOURCE, expectThrow("variable not found"));
-# #: (Integer, Integer) -> void
-# ->(x, y) { x + z }
-# SOURCE
+Deno.test(<<SOURCE, expectThrow("variable not found"));
+#: (Integer, Integer) -> void
+->(x, y) { x + z }
+SOURCE
 
 # Deno.test(<<SOURCE, expectResult({ tag: "Number" }));
 # #: (Integer) -> void

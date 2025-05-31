@@ -170,7 +170,11 @@ module Chapter3
         NumberTerm.new(n: node.value)
       when node.is_a?(Prism::CallNode)
         leftNode = node.receiver
-        raise "Unknown node type; node => #{node.class}" if leftNode.nil?
+        if leftNode.nil?
+          # Rubyにおいて未定義変数の参照っぽい記述は self.x というメソッド呼び出しなので AST としては CallNode になる
+          # VarTerm として処理してみる
+          return VarTerm.new(name: node.name)
+        end
         raise "Unknown node type; node => #{node.class}" unless node.name == :+ || node.name == :call
         if node.name == :+
           rightNode = node.arguments&.arguments&.first or raise "Unknown node type; node => #{node.class}"

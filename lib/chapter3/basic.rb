@@ -30,7 +30,7 @@ module Chapter3
         raise "number expected" if rightTy[:tag] != "Number"
         { tag: "Number" }
       when t.is_a?(TinyRbParser::VarTerm)
-        raise "unknown variable: #{t.name}" unless tyEnv.key? t.name
+        raise "variable not found" unless tyEnv.key? t.name
         tyEnv[t.name]
       when t.is_a?(TinyRbParser::FuncTerm)
         newTyEnv = tyEnv.dup

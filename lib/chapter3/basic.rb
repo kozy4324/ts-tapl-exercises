@@ -35,13 +35,16 @@ module Chapter3
       when t.is_a?(TinyRbParser::FuncTerm)
         newTyEnv = tyEnv.dup
         t.params.each { |p| newTyEnv[p.name] = p.type }
-        Chapter3::TinyRbParser.to_typ({ tag: "Func", params: t.params.map {|p| { name: p.name, type: p.type } }, retType: typecheck(t.body, newTyEnv ) })
+        { tag: "Func", params: t.params.map {|p| { name: p.name, type: p.type } }, retType: typecheck(t.body, newTyEnv) }
       when t.is_a?(TinyRbParser::CallTerm)
         funcTy = typecheck(t.func, tyEnv)
         raise "function type expected" unless funcTy[:tag] == "Func"
+        # funcTy が FuncType であることが自明だが steep は narrowing できないパターン
         raise "wrong number of arguments" if funcTy[:params].size != t.args.size
         raise "argument type mismatch" if funcTy[:params].zip(t.args).any? { |param, argTerm| !typeEq(param[:type], typecheck(argTerm, tyEnv))} # steep:ignore
-        Chapter3::TinyRbParser.to_typ funcTy[:retType]
+        retType = funcTy[:retType]
+        raise "never raise..." if retType.is_a?(String)
+        retType
       else
         raise "not implemented"
       end

@@ -59,20 +59,24 @@ Deno.test(<<SOURCE, expectThrow("variable not found"));
 ->(x, y) { x + z }
 SOURCE
 
-# Deno.test(<<SOURCE, expectResult({ tag: "Number" }));
-# #: (Integer) -> void
-# (->(x) { x }).call(42)
-# SOURCE
+Deno.test(<<SOURCE, expectResult({ tag: "Number" }));
+#: (Integer) -> void
+(->(x) { x }).call(42)
+SOURCE
 
-# Deno.test(<<SOURCE, expectThrow("argument type mismatch"));
-# #: (Integer) -> void
-# (->(x) { x }).call(true)
-# SOURCE
+Deno.test(<<SOURCE, expectThrow("argument type mismatch"));
+#: (Integer) -> void
+(->(x) { x }).call(true)
+SOURCE
 
-# Deno.test(<<SOURCE, expectThrow("wrong number of arguments"));
-# #: (Integer) -> void
-# (->(x) { 42 }).call(1, 2, 3)
-# SOURCE
+Deno.test(<<SOURCE, expectThrow("wrong number of arguments"));
+#: (Integer) -> void
+(->(x) { 42 }).call(1, 2, 3)
+SOURCE
+
+Deno.test(<<SOURCE, expectThrow("function type expected"));
+(true).call(1)
+SOURCE
 
 # Deno.test(<<SOURCE, expectResult({ tag: "Func", params: [{ name: "f", type: { tag: "Func", params: [{ name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } } }], retType: { tag: "Number" } }));
 # #: ( ^(Integer) -> void ) -> void

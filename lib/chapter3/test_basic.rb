@@ -39,10 +39,10 @@ Deno.test("1 ? 2 : 3", expectThrow("boolean expected"));
 Deno.test("true ? 1 : true", expectThrow("then and else have different types"));
 Deno.test("true ? (1 + 2) : (3 + (false ? 4 : 5))", expectResult({ tag: "Number" }));
 
-# Deno.test(<<SOURCE, expectResult({ tag: "Func", params: [{ name: "x", type: { tag: "Boolean" } }], retType: { tag: "Number" } }));
-# #: (bool) -> void
-# ->(x) { 42 }
-# SOURCE
+Deno.test(<<SOURCE, expectResult({ tag: "Func", params: [{ name: "x", type: { tag: "Boolean" } }], retType: { tag: "Number" } }));
+#: (bool) -> void
+->(x) { 42 }
+SOURCE
 
 # Deno.test(<<SOURCE, expectResult({ tag: "Func", params: [{ name: "x", type: { tag: "Number" } }], retType: { tag: "Number" } }));
 # #: (Integer) -> void

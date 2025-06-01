@@ -112,33 +112,42 @@ module Chapter3
       method_type = annotation.method_type.type
       return { param_typs: [], return_typ: nil } unless method_type.is_a? RBS::Types::Function
       params = method_type.required_positionals
-      param_typs = params.map do |param|
-        case param.type.to_s
-        when "bool"
-          to_typ({ tag: "Boolean" })
-        when "Integer"
-          to_typ({ tag: "Number" })
-        when /^\^.*/
-          param_type_def = type_def(2, Prism.parse("#: #{param.type.to_s[1..]}"))
-          to_typ({ tag: "Func", params: param_type_def[:param_typs].map.with_index {|typ, index| { name: "_#{index + 1}", type: typ } }, retType: param_type_def[:return_typ] })
-        else
-          raise "Unknown annotation type"
-        end
-      end
-      return_typ = case method_type.return_type.to_s
-                   when "void"
-                     nil
-                   when "bool"
-                     to_typ({ tag: "Boolean" })
-                   when "Integer"
-                     to_typ({ tag: "Number" })
-                   when /^\^.*/
-                     param_type_def = type_def(2, Prism.parse("#: #{method_type.return_type.to_s[1..]}"))
-                     to_typ({ tag: "Func", params: param_type_def[:param_typs].map {|typ| Param.new(name: "x", type: typ) }, body: param_type_def[:return_typ] })
-                   else
-                     raise "Unknown annotation type"
-                   end
-      { param_typs: param_typs, return_typ: return_typ }
+      {
+        param_typs: params.map do |param|
+          case param.type.to_s
+          when "bool"
+            { tag: "Boolean" }
+          when "Integer"
+            { tag: "Number" }
+          when /^\^.*/
+            param_type_def = type_def(2, Prism.parse("#: #{param.type.to_s[1..]}"))
+            to_typ({
+              tag: "Func",
+              params: param_type_def[:param_typs].map.with_index {|typ, index| { name: "_#{index + 1}", type: typ } },
+              retType: param_type_def[:return_typ]
+            })
+          else
+            raise "Unknown annotation type"
+          end
+        end,
+        return_typ: case method_type.return_type.to_s
+                    when "void"
+                      nil
+                    when "bool"
+                      { tag: "Boolean" }
+                    when "Integer"
+                      { tag: "Number" }
+                    when /^\^.*/
+                      param_type_def = type_def(2, Prism.parse("#: #{method_type.return_type.to_s[1..]}"))
+                      to_typ({
+                        tag: "Func",
+                        params: param_type_def[:param_typs].map {|typ| Param.new(name: "x", type: typ) },
+                        body: param_type_def[:return_typ]
+                      })
+                    else
+                      raise "Unknown annotation type"
+                    end
+      }
     end
 
     #: (String) -> Term

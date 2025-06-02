@@ -22,7 +22,7 @@ require "rbs/inline"
 # @rbs!
 #   type Chapter3::typ = { tag: "Boolean" }
 #                      | { tag: "Number" }
-#                      | { tag: "Func", params: Array[{ name: String, type: Chapter3::typ }], retType: Chapter3::typ }
+#                      | { tag: "Func", params: Array[{ name: String, typ: Chapter3::typ }], retType: Chapter3::typ }
 
 module Chapter3
   class TinyRbParser
@@ -92,7 +92,7 @@ module Chapter3
       h
     end
 
-    #: (Integer, Prism::ParseResult) -> { param_typs: Array[Chapter3::typ], return_typ: Chapter3::typ | nil }
+    #: (Integer, Prism::ParseResult) -> { param_typs: Array[{ name: String, typ: Chapter3::typ }], return_typ: Chapter3::typ | nil }
     def self.type_def(node_location_start_line, parse_result)
       rbs_result = RBS::Inline::AnnotationParser.parse(parse_result.comments)
       parsing_result = rbs_result.find {|r| r.comments.first.location.start_line == node_location_start_line - 1}
@@ -106,16 +106,19 @@ module Chapter3
         param_typs: params.map do |param|
           case param.type.to_s
           when "bool"
-            { tag: "Boolean" }
+            { name: "_", typ: { tag: "Boolean" } }
           when "Integer"
-            { tag: "Number" }
+            { name: "_", typ: { tag: "Number" } }
           when /^\^.*/
             param_type_def = type_def(2, Prism.parse("#: #{param.type.to_s[1..]}"))
-            to_typ({
-              tag: "Func",
-              params: param_type_def[:param_typs].map.with_index {|typ, index| { name: "_#{index + 1}", type: typ } },
-              retType: param_type_def[:return_typ]
-            })
+            {
+              name: "_",
+              typ: to_typ({
+                tag: "Func",
+                params: param_type_def[:param_typs],
+                retType: param_type_def[:return_typ]
+              })
+            }
           else
             raise "Unknown annotation type"
           end
@@ -131,7 +134,7 @@ module Chapter3
                       param_type_def = type_def(2, Prism.parse("#: #{method_type.return_type.to_s[1..]}"))
                       to_typ({
                         tag: "Func",
-                        params: param_type_def[:param_typs].map.with_index {|typ, index| { name: "_#{index + 1}", type: typ } },
+                        params: param_type_def[:param_typs],
                         body: param_type_def[:return_typ]
                       })
                     else
@@ -203,7 +206,7 @@ module Chapter3
           raise "Unknown node type; node => #{node.class}" unless paramters_node.is_a?(Prism::ParametersNode)
           params = paramters_node.requireds.map.with_index do |required_paramter_node, idx|
             raise "Unknown node type; node => #{node.class}" unless required_paramter_node.is_a?(Prism::RequiredParameterNode)
-            { name: required_paramter_node.name.to_s, typ: type_def[:param_typs][idx] }
+            { name: required_paramter_node.name.to_s, typ: type_def[:param_typs][idx]&.[](:typ) }
           end
           FuncTerm.new(params: params, body: term(statement_node, result))
         end

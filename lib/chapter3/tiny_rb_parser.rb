@@ -22,7 +22,7 @@ require "rbs/inline"
 # @rbs!
 #   type Chapter3::typ = { tag: "Boolean" }
 #                      | { tag: "Number" }
-#                      | { tag: "Func", params: Array[{ name: String, typ: Chapter3::typ | nil }], retType: Chapter3::typ | nil }
+#                      | { tag: "Func", params: Array[Chapter3::typ | nil], retType: Chapter3::typ | nil }
 
 module Chapter3
   class TinyRbParser
@@ -87,7 +87,7 @@ module Chapter3
       end
     end
 
-    #: (Integer, Prism::ParseResult) -> { param_typs: Array[{ name: String, typ: Chapter3::typ }], return_typ: Chapter3::typ | nil }
+    #: (Integer, Prism::ParseResult) -> { param_typs: Array[Chapter3::typ], return_typ: Chapter3::typ | nil }
     def self.type_def(node_location_start_line, parse_result)
       rbs_result = RBS::Inline::AnnotationParser.parse(parse_result.comments)
       parsing_result = rbs_result.find {|r| r.comments.first.location.start_line == node_location_start_line - 1}
@@ -101,18 +101,15 @@ module Chapter3
         param_typs: params.map do |param|
           case param.type.to_s
           when "bool"
-            { name: "_", typ: { tag: "Boolean" } }
+            { tag: "Boolean" }
           when "Integer"
-            { name: "_", typ: { tag: "Number" } }
+            { tag: "Number" }
           when /^\^.*/
             param_type_def = type_def(2, Prism.parse("#: #{param.type.to_s[1..]}"))
             {
-              name: "_",
-              typ: {
-                tag: "Func",
-                params: param_type_def[:param_typs],
-                retType: param_type_def[:return_typ]
-              }
+              tag: "Func",
+              params: param_type_def[:param_typs],
+              retType: param_type_def[:return_typ]
             }
           else
             raise "Unknown annotation type"
@@ -202,9 +199,10 @@ module Chapter3
           FuncTerm.new(
             params: paramters_node.requireds.map.with_index do |required_paramter_node, idx|
               raise "Unknown node type; node => #{node.class}" unless required_paramter_node.is_a?(Prism::RequiredParameterNode)
-              { name: required_paramter_node.name.to_s, typ: type_def[:param_typs][idx]&.[](:typ) }
+              { name: required_paramter_node.name.to_s, typ: type_def[:param_typs][idx] }
             end,
-            body: term(statement_node, result))
+            body: term(statement_node, result)
+          )
         end
       else
         raise "Unknown node type; node => #{node.class}"

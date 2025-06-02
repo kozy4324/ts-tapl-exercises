@@ -37,13 +37,13 @@ module Chapter3
         t.params.each do |p|
           newTyEnv[p[:name]] = p[:typ] unless p[:typ].nil?
         end
-        { tag: "Func", params: t.params, retType: typecheck(t.body, newTyEnv) }
+        { tag: "Func", params: t.params.map { |p| p[:typ] }, retType: typecheck(t.body, newTyEnv) }
       when t.is_a?(TinyRbParser::CallTerm)
         funcTy = typecheck(t.func, tyEnv)
         raise "function type expected" unless funcTy[:tag] == "Func"
         # funcTy が FuncType であることが自明だが steep は narrowing できないパターン
         raise "wrong number of arguments" if funcTy[:params].size != t.args.size
-        raise "argument type mismatch" if funcTy[:params].zip(t.args).any? { |param, argTerm| !typeEq(param[:typ], typecheck(argTerm, tyEnv))} # steep:ignore
+        raise "argument type mismatch" if funcTy[:params].zip(t.args).any? { |param, argTerm| !typeEq(param, typecheck(argTerm, tyEnv))} # steep:ignore
         retType = funcTy[:retType]
         raise "never raise..." if retType.is_a?(String)
         raise "return type declaration is required" if retType.nil?

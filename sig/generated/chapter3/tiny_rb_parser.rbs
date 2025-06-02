@@ -46,12 +46,12 @@ module Chapter3
     end
 
     class FuncTerm < Term
-      attr_accessor params: Array[{ name: String, typ: typ }]
+      attr_accessor params: Array[{ name: String, typ: typ | nil }]
 
       attr_accessor body: Term
 
-      # : (params: Array[{ name: String, typ: typ }], body: Term) -> void
-      def initialize: (params: Array[{ name: String, typ: typ }], body: Term) -> void
+      # : (params: Array[{ name: String, typ: typ | nil }], body: Term) -> void
+      def initialize: (params: Array[{ name: String, typ: typ | nil }], body: Term) -> void
     end
 
     class CallTerm < Term
@@ -77,4 +77,4 @@ module Chapter3
   end
 end
 
-type Chapter3::typ = { tag: "Boolean" } | { tag: "Number" } | { tag: "Func", params: Array[{ name: String, typ: Chapter3::typ }], retType: Chapter3::typ }
+type Chapter3::typ = { tag: "Boolean" } | { tag: "Number" } | { tag: "Func", params: Array[{ name: String, typ: Chapter3::typ | nil }], retType: Chapter3::typ | nil }

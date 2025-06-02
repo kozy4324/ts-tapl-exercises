@@ -22,7 +22,7 @@ require "rbs/inline"
 # @rbs!
 #   type Chapter3::typ = { tag: "Boolean" }
 #                      | { tag: "Number" }
-#                      | { tag: "Func", params: Array[{ name: String, typ: Chapter3::typ }], retType: Chapter3::typ }
+#                      | { tag: "Func", params: Array[{ name: String, typ: Chapter3::typ | nil }], retType: Chapter3::typ | nil }
 
 module Chapter3
   class TinyRbParser
@@ -68,9 +68,9 @@ module Chapter3
     end
 
     class FuncTerm < Term
-      attr_accessor :params #: Array[{ name: String, typ: typ }]
+      attr_accessor :params #: Array[{ name: String, typ: typ | nil }]
       attr_accessor :body #: Term
-      #: (params: Array[{ name: String, typ: typ }], body: Term) -> void
+      #: (params: Array[{ name: String, typ: typ | nil }], body: Term) -> void
       def initialize(params:, body:)
         @params = params
         @body = body
@@ -204,11 +204,12 @@ module Chapter3
           raise "Unknown node type; node => #{node.class}" unless block_parameters_node.is_a?(Prism::BlockParametersNode)
           paramters_node = block_parameters_node.parameters
           raise "Unknown node type; node => #{node.class}" unless paramters_node.is_a?(Prism::ParametersNode)
-          params = paramters_node.requireds.map.with_index do |required_paramter_node, idx|
-            raise "Unknown node type; node => #{node.class}" unless required_paramter_node.is_a?(Prism::RequiredParameterNode)
-            { name: required_paramter_node.name.to_s, typ: type_def[:param_typs][idx]&.[](:typ) }
-          end
-          FuncTerm.new(params: params, body: term(statement_node, result))
+          FuncTerm.new(
+            params: paramters_node.requireds.map.with_index do |required_paramter_node, idx|
+              raise "Unknown node type; node => #{node.class}" unless required_paramter_node.is_a?(Prism::RequiredParameterNode)
+              { name: required_paramter_node.name.to_s, typ: type_def[:param_typs][idx]&.[](:typ) }
+            end,
+            body: term(statement_node, result))
         end
       else
         raise "Unknown node type; node => #{node.class}"

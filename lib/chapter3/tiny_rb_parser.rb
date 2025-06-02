@@ -68,22 +68,12 @@ module Chapter3
     end
 
     class FuncTerm < Term
-      attr_accessor :params #: Array[Param]
+      attr_accessor :params #: Array[{ name: String, typ: typ }]
       attr_accessor :body #: Term
-      #: (params: Array[Param], body: Term) -> void
+      #: (params: Array[{ name: String, typ: typ }], body: Term) -> void
       def initialize(params:, body:)
         @params = params
         @body = body
-      end
-    end
-
-    class Param
-      attr_accessor :name #: String
-      attr_accessor :type #: typ
-      #: (name: String, type: typ) -> void
-      def initialize(name:, type:)
-        @name = name
-        @type = type
       end
     end
 
@@ -141,7 +131,7 @@ module Chapter3
                       param_type_def = type_def(2, Prism.parse("#: #{method_type.return_type.to_s[1..]}"))
                       to_typ({
                         tag: "Func",
-                        params: param_type_def[:param_typs].map {|typ| Param.new(name: "x", type: typ) },
+                        params: param_type_def[:param_typs].map.with_index {|typ, index| { name: "_#{index + 1}", type: typ } },
                         body: param_type_def[:return_typ]
                       })
                     else
@@ -213,7 +203,7 @@ module Chapter3
           raise "Unknown node type; node => #{node.class}" unless paramters_node.is_a?(Prism::ParametersNode)
           params = paramters_node.requireds.map.with_index do |required_paramter_node, idx|
             raise "Unknown node type; node => #{node.class}" unless required_paramter_node.is_a?(Prism::RequiredParameterNode)
-            Param.new(name: required_paramter_node.name.to_s, type: type_def[:param_typs][idx])
+            { name: required_paramter_node.name.to_s, typ: type_def[:param_typs][idx] }
           end
           FuncTerm.new(params: params, body: term(statement_node, result))
         end

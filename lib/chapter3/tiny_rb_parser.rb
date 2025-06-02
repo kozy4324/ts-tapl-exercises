@@ -87,11 +87,6 @@ module Chapter3
       end
     end
 
-    #: (untyped) -> Chapter3::typ
-    def self.to_typ(h)
-      h
-    end
-
     #: (Integer, Prism::ParseResult) -> { param_typs: Array[{ name: String, typ: Chapter3::typ }], return_typ: Chapter3::typ | nil }
     def self.type_def(node_location_start_line, parse_result)
       rbs_result = RBS::Inline::AnnotationParser.parse(parse_result.comments)
@@ -113,11 +108,11 @@ module Chapter3
             param_type_def = type_def(2, Prism.parse("#: #{param.type.to_s[1..]}"))
             {
               name: "_",
-              typ: to_typ({
+              typ: {
                 tag: "Func",
                 params: param_type_def[:param_typs],
                 retType: param_type_def[:return_typ]
-              })
+              }
             }
           else
             raise "Unknown annotation type"
@@ -132,11 +127,11 @@ module Chapter3
                       { tag: "Number" }
                     when /^\^.*/
                       param_type_def = type_def(2, Prism.parse("#: #{method_type.return_type.to_s[1..]}"))
-                      to_typ({
+                      {
                         tag: "Func",
                         params: param_type_def[:param_typs],
-                        body: param_type_def[:return_typ]
-                      })
+                        retType: param_type_def[:return_typ]
+                      }
                     else
                       raise "Unknown annotation type"
                     end

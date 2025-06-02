@@ -68,9 +68,9 @@ module Chapter3
     end
 
     class FuncTerm < Term
-      attr_accessor :params #: Array[{ name: String, typ: typ | nil }]
+      attr_accessor :params #: Array[{ name: String, type: typ | nil }]
       attr_accessor :body #: Term
-      #: (params: Array[{ name: String, typ: typ | nil }], body: Term) -> void
+      #: (params: Array[{ name: String, type: typ | nil }], body: Term) -> void
       def initialize(params:, body:)
         @params = params
         @body = body
@@ -197,9 +197,9 @@ module Chapter3
           paramters_node = block_parameters_node.parameters
           raise "Unknown node type; node => #{node.class}" unless paramters_node.is_a?(Prism::ParametersNode)
           FuncTerm.new(
-            params: paramters_node.requireds.map.with_index do |required_paramter_node, idx|
+            params: paramters_node.requireds.map.with_index.map do |required_paramter_node, idx|
               raise "Unknown node type; node => #{node.class}" unless required_paramter_node.is_a?(Prism::RequiredParameterNode)
-              { name: required_paramter_node.name.to_s, typ: type_def[:param_typs][idx] }
+              { name: required_paramter_node.name.to_s, type: type_def[:param_typs][idx] }
             end,
             body: term(statement_node, result)
           )

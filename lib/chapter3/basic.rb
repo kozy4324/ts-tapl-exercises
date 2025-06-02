@@ -35,9 +35,9 @@ module Chapter3
       when t.is_a?(TinyRbParser::FuncTerm)
         newTyEnv = tyEnv.dup
         t.params.each do |p|
-          newTyEnv[p[:name]] = p[:typ] unless p[:typ].nil?
+          newTyEnv[p[:name]] = p[:type] unless p[:type].nil?
         end
-        { tag: "Func", params: t.params.map { |p| p[:typ] }, retType: typecheck(t.body, newTyEnv) }
+        { tag: "Func", params: t.params.map { |p| p[:type] }, retType: typecheck(t.body, newTyEnv) }
       when t.is_a?(TinyRbParser::CallTerm)
         funcTy = typecheck(t.func, tyEnv)
         raise "function type expected" unless funcTy[:tag] == "Func"

@@ -46,12 +46,12 @@ module Chapter3
     end
 
     class FuncTerm < Term
-      attr_accessor params: Array[{ name: String, typ: typ | nil }]
+      attr_accessor params: Array[{ name: String, type: typ | nil }]
 
       attr_accessor body: Term
 
-      # : (params: Array[{ name: String, typ: typ | nil }], body: Term) -> void
-      def initialize: (params: Array[{ name: String, typ: typ | nil }], body: Term) -> void
+      # : (params: Array[{ name: String, type: typ | nil }], body: Term) -> void
+      def initialize: (params: Array[{ name: String, type: typ | nil }], body: Term) -> void
     end
 
     class CallTerm < Term

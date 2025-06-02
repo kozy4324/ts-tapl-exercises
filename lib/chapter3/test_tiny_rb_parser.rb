@@ -19,7 +19,7 @@ assert_equal(parse('1').class, Chapter3::TinyRbParser::NumberTerm)
 assert_equal(parse('1 + 2').class, Chapter3::TinyRbParser::AddTerm)
 assert_equal(parse('(1 + 2)').class, Chapter3::TinyRbParser::AddTerm)
 assert_equal(parse('-> { 1 }').class, Chapter3::TinyRbParser::FuncTerm)
-assert_equal(parse('->(a) { a }').params.first, { name: "a", typ: nil })
+assert_equal(parse('->(a) { a }').params.first, { name: "a", type: nil })
 assert_equal(parse('->(a) { a }').body.class, Chapter3::TinyRbParser::VarTerm)
 assert_equal(parse('-> { 1 }.call').class, Chapter3::TinyRbParser::CallTerm)
 assert_equal(parse('-> { 1 }.call').func.class, Chapter3::TinyRbParser::FuncTerm)
@@ -35,17 +35,17 @@ assert_equal(parse('->(a, b) { a + b }').body.class, Chapter3::TinyRbParser::Add
 assert_equal(parse('->(a, b) { a + b }').body.left.class, Chapter3::TinyRbParser::VarTerm)
 assert_equal(parse('->(a, b) { a + b }').body.right.class, Chapter3::TinyRbParser::VarTerm)
 
-assert_equal(parse(<<SOURCE).params.first[:typ], { tag: "Boolean" })
+assert_equal(parse(<<SOURCE).params.first[:type], { tag: "Boolean" })
 #: (bool) -> void
 ->(a) { a }
 SOURCE
 
-assert_equal(parse(<<SOURCE).params.first[:typ], { tag: "Number" })
+assert_equal(parse(<<SOURCE).params.first[:type], { tag: "Number" })
 #: (Integer) -> void
 ->(a) { a }
 SOURCE
 
-assert_equal(parse(<<SOURCE).params.first[:typ], { tag: "Func", params: [], retType: nil })
+assert_equal(parse(<<SOURCE).params.first[:type], { tag: "Func", params: [], retType: nil })
 #: ( ^() -> void ) -> void
 ->(a) { a }
 SOURCE

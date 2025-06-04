@@ -1,6 +1,6 @@
 desc "Generate rbs files by rbs-inline"
 task "rbs" do
-  sh "bundle exec rbs-inline lib --output sig"
+  sh "rbs-inline lib --output sig" if system "which rbs-inline"
 end
 
 task :default => [:rbs, :chapter2, :chapter3]

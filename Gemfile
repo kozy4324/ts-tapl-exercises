@@ -2,6 +2,7 @@
 
 source "https://rubygems.org"
 
-gem "prism", "1.2.0"
+gem "prism"
 gem "steep"
-gem "rbs-inline"
+gem "rbs", "4.0.0.dev.4"
+gem "minitest"

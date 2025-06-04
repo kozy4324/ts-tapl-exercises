@@ -1,7 +1,7 @@
 # rbs_inline: enabled
 
 require "prism"
-require "rbs/inline"
+require "rbs"
 
 # chapter3 で追加される構文
 # 変数参照
@@ -89,11 +89,13 @@ module Chapter3
 
     #: (Integer, Prism::ParseResult) -> { param_types: Array[Chapter3::typ], return_type: Chapter3::typ | nil }
     def self.type_def(node_location_start_line, parse_result)
-      rbs_result = RBS::Inline::AnnotationParser.parse(parse_result.comments)
-      parsing_result = rbs_result.find {|r| r.comments.first.location.start_line == node_location_start_line - 1}
-      return { param_types: [], return_type: nil } if parsing_result.nil?
-      annotation = parsing_result.annotations.first
-      return { param_types: [], return_type: nil } unless annotation.is_a? RBS::Inline::AST::Annotations::MethodTypeAssertion
+      return { param_types: [], return_type: nil } if parse_result.comments.empty?
+      inline_comment = parse_result.comments.find {|c| c.location.start_line == node_location_start_line - 1}
+      return { param_types: [], return_type: nil } if inline_comment.nil?
+      comment_source = parse_result.source.source[inline_comment.location.start_offset, inline_comment.location.length]
+      return { param_types: [], return_type: nil } if comment_source.nil?
+      annotation = RBS::Parser.parse_inline_leading_annotation(comment_source[1...], 0...) # steep:ignore
+      return { param_types: [], return_type: nil } unless annotation.is_a? RBS::AST::Ruby::Annotations::ColonMethodTypeAnnotation # steep:ignore
       method_type = annotation.method_type.type
       return { param_types: [], return_type: nil } unless method_type.is_a? RBS::Types::Function
       params = method_type.required_positionals

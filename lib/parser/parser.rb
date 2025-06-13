@@ -1,19 +1,3 @@
-# type Term =
-#   | { tag: "true" }
-#   | { tag: "false" }
-#   | { tag: "if"; cond: Term; thn: Term; els: Term }
-#   | { tag: "number"; n: number }
-#   | { tag: "add"; left: Term; right: Term };
-
-# Deno.test("1 + 2", expectResult({ tag: "Number" }));
-# Deno.test("1 + true", expectThrow("number expected"));
-# Deno.test("1 + (2 + 3)", expectResult({ tag: "Number" }));
-# Deno.test("true ? 1 : 2", expectResult({ tag: "Number" }));
-# Deno.test("true ? false : true", expectResult({ tag: "Boolean" }));
-# Deno.test("1 ? 2 : 3", expectThrow("boolean expected"));
-# Deno.test("true ? 1 : true", expectThrow("then and else have different types"));
-# Deno.test("true ? (1 + 2) : (3 + (false ? 4 : 5))", expectResult({ tag: "Number" }));
-
 # --- Step 1: Tokenizer ---
 class Tokenizer
   KEYWORDS = %w[true false]
@@ -79,7 +63,13 @@ class Tokenizer
 end
 
 # --- Step 2: AST Node (Ruby hash) ---
-# See TS type in comment. Rubyではハッシュで表現。
+# Rubyではハッシュで表現。
+# type Term =
+#   | { tag: "true" }
+#   | { tag: "false" }
+#   | { tag: "if"; cond: Term; thn: Term; els: Term }
+#   | { tag: "number"; n: number }
+#   | { tag: "add"; left: Term; right: Term };
 
 # --- Step 3: Literal Parser ---
 class Parser
@@ -89,10 +79,24 @@ class Parser
   end
 
   def parse
-    parse_term
+    parse_if
   end
 
   private
+  # if式: cond ? thn : els
+  def parse_if
+    cond = parse_term
+    if peek_token == "?"
+      next_token # consume ?
+      thn = parse_term
+      expect_token(":")
+      els = parse_term
+      { tag: "if", cond: cond, thn: thn, els: els }
+    else
+      cond
+    end
+  end
+
   # 加算式: term = factor ("+" factor)*
   def parse_term
     node = parse_factor
@@ -124,7 +128,7 @@ class Parser
         raise "Unknown token: #{tok}"
       end
     when "("
-      node = parse_term
+      node = parse_if
       expect_token(")")
       node
     else
@@ -158,4 +162,9 @@ if __FILE__ == $0
   p Parser.new("1 + 2").parse #=> { tag: "add", left: {tag: "number", n: 1}, right: {tag: "number", n: 2} }
   p Parser.new("1 + 2 + 3").parse #=> { tag: "add", left: {tag: "add", left: {tag: "number", n: 1}, right: {tag: "number", n: 2}}, right: {tag: "number", n: 3} }
   p Parser.new("1 + (2 + 3)").parse #=> { tag: "add", left: {tag: "number", n: 1}, right: {tag: "add", left: {tag: "number", n: 2}, right: {tag: "number", n: 3}} }
+  p Parser.new("1 ? 1 : 2").parse #=> {tag: "if", cond: {tag: "number", n: 1}, thn: {tag: "number", n: 1}, els: {tag: "number", n: 2}}
+  p Parser.new("true ? 1 : 2").parse #=> { tag: "if", cond: {tag: "true"}, thn: {tag: "number", n: 1}, els: {tag: "number", n: 2} }
+  p Parser.new("true ? false : true").parse #=> { tag: "if", cond: {tag: "true"}, thn: {tag: "false"}, els: {tag: "true"} }
+  p Parser.new("true ? 1 : true").parse #=> { tag: "if", cond: {tag: "true"}, thn: {tag: "number", n: 1}, els: {tag: "true"} }
+  p Parser.new("true ? (1 + 2) : (3 + (false ? 4 : 5))").parse #=> { tag: "if", cond: {tag: "true"}, thn: {tag: "add", left: {tag: "number", n: 1}, right: {tag: "number", n: 2}}, els: {tag: "add", left: {tag: "number", n: 3}, right: {tag: "if", cond: {tag: "false"}, thn: {tag: "number", n: 4}, els: {tag: "number", n: 5}}} }
 end

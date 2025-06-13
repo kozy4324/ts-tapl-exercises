@@ -89,11 +89,23 @@ class Parser
   end
 
   def parse
-    parse_literal
+    parse_term
   end
 
   private
-  def parse_literal
+  # 加算式: term = factor ("+" factor)*
+  def parse_term
+    node = parse_factor
+    while peek_token == "+"
+      next_token # consume "+"
+      right = parse_factor
+      node = { tag: "add", left: node, right: right }
+    end
+    node
+  end
+
+  # factor: 数値・true/false・括弧
+  def parse_factor
     tok = next_token
     case tok
     when Hash
@@ -111,6 +123,10 @@ class Parser
       else
         raise "Unknown token: #{tok}"
       end
+    when "("
+      node = parse_term
+      expect_token(")")
+      node
     else
       raise "Unexpected token: #{tok.inspect}"
     end
@@ -122,6 +138,16 @@ class Parser
     @pos += 1
     tok
   end
+
+  def peek_token
+    return nil if @pos >= @tokens.size
+    @tokens[@pos]
+  end
+
+  def expect_token(val)
+    tok = next_token
+    raise "Expected '#{val}', got '#{tok}'" unless tok == val
+  end
 end
 
 # --- テスト例 ---
@@ -129,4 +155,7 @@ if __FILE__ == $0
   p Parser.new("true").parse #=> { tag: "true" }
   p Parser.new("false").parse #=> { tag: "false" }
   p Parser.new("42").parse #=> { tag: "number", n: 42 }
+  p Parser.new("1 + 2").parse #=> { tag: "add", left: {tag: "number", n: 1}, right: {tag: "number", n: 2} }
+  p Parser.new("1 + 2 + 3").parse #=> { tag: "add", left: {tag: "add", left: {tag: "number", n: 1}, right: {tag: "number", n: 2}}, right: {tag: "number", n: 3} }
+  p Parser.new("1 + (2 + 3)").parse #=> { tag: "add", left: {tag: "number", n: 1}, right: {tag: "add", left: {tag: "number", n: 2}, right: {tag: "number", n: 3}} }
 end

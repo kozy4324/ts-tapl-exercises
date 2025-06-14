@@ -17,14 +17,14 @@ end
 
 def expectResult(expected)
   Proc.new do |source|
-    assert_equal(expected, Checker.typecheck(TinyRbParser.parse(source)))
+    assert_equal(expected, Checker.typecheck(Parser.new(source).parse))
   end
 end
 
 def expectThrow(expected_message)
   Proc.new do |source|
     err = assert_raises(RuntimeError) do
-      Checker.typecheck(TinyRbParser.parse(source))
+      Checker.typecheck(Parser.new(source).parse)
     end
     assert_equal(expected_message, err.message)
   end

@@ -1,8 +1,3 @@
-# TODO: 関数呼び出し
-# ( (x: number) => x )(42);
-# ( (x: number) => x )(true);
-# ( (x: number) => 42 )(1, 2, 3);
-
 # TODO: 関数型
 # (f: (x: number) => number) => 1
 
@@ -133,13 +128,32 @@ class Parser
     end
   end
 
-  # 加算式: term = factor ("+" factor)*
+  # 加算式: term = call ("+" call)*
   def parse_term
-    node = parse_factor
+    node = parse_call
     while peek_token == "+"
       next_token # consume "+"
-      right = parse_factor
+      right = parse_call
       node = { tag: "add", left: node, right: right }
+    end
+    node
+  end
+
+  # 関数呼び出し: call = factor ("(" args ")")*
+  def parse_call
+    node = parse_factor
+    while peek_token == "("
+      next_token # consume '('
+      args = []
+      unless peek_token == ")"
+        loop do
+          args << parse_if
+          break unless peek_token == ","
+          next_token
+        end
+      end
+      expect_token(")")
+      node = { tag: "call", func: node, args: args }
     end
     node
   end
@@ -293,6 +307,9 @@ class Parser
 end
 
 # --- テスト例 ---
+# コメントの通りに出力されることをRubyプログラムを実行して確認してください
+# もしコメントの期待値と異なる出力となっている場合はコメントを正としてプログラムを続けて修正してください
+# なお新たに追加したテスト例とコメントについてはその限りではありません。こちらから指示を行います。
 if __FILE__ == $0
   p Parser.new("true").parse #=> { tag: "true" }
   p Parser.new("false").parse #=> { tag: "false" }
@@ -311,4 +328,7 @@ if __FILE__ == $0
   p Parser.new("(x: number, y: number) => x + y").parse #=> { tag: "func", params: [{name: "x", type: {tag: "Number"}}, {name: "y", type: {tag: "Number"}}], body: {tag: "add", left: {tag: "var", name: "x"}, right: {tag: "var", name: "y"}} }
   p Parser.new("(x: number, y: number) => x + z").parse #=> { tag: "func", params: [{name: "x", type: {tag: "Number"}}, {name: "y", type: {tag: "Number"}}], body: {tag: "add", left: {tag: "var", name: "x"}, right: {tag: "var", name: "z"}} }
   p Parser.new("1 + true").parse #=> {tag: "add", left: {tag: "number", n: 1}, right: {tag: "true"}}
+  p Parser.new("((x: number) => x)(42)").parse #=> { tag: "call", func: { tag: "func", params: [{name: "x", type: {tag: "Number"}}], body: {tag: "var", name: "x"} }, args: [{tag: "number", n: 42}] }
+  p Parser.new("((x: number) => x)(true)").parse #=> { tag: "call", func: { tag: "func", params: [{name: "x", type: {tag: "Number"}}], body: {tag: "var", name: "x"} }, args: [{tag: "true"}] }
+  p Parser.new("((x: number) => 42)(1, 2, 3)").parse #=> { tag: "call", func: { tag: "func", params: [{name: "x", type: {tag: "Number"}}], body: {tag: "number", n: 42} }, args: [{tag: "number", n: 1}, {tag: "number", n: 2}, {tag: "number", n: 3}] }
 end

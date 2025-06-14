@@ -1,8 +1,3 @@
-# TODO: 変数参照
-# (x: number) => x;
-# (x: number, y: number) => x + y;
-# (x: number, y: number) => x + z;
-
 # TODO: 関数呼び出し
 # ( (x: number) => x )(42);
 # ( (x: number) => x )(true);
@@ -166,8 +161,14 @@ class Parser
           raise "Unknown keyword: #{tok[:value]}"
         end
       elsif tok[:type] == :ident
-        # 変数参照
-        { tag: "var", name: tok[:value] }
+        # キーワードと一致する場合はキーワードとして扱う
+        if tok[:value] == "true"
+          { tag: "true" }
+        elsif tok[:value] == "false"
+          { tag: "false" }
+        else
+          { tag: "var", name: tok[:value] }
+        end
       else
         raise "Unknown token: #{tok}"
       end
@@ -309,4 +310,5 @@ if __FILE__ == $0
   p Parser.new("(x: number) => x").parse #=> { tag: "func", params: [{name: "x", type: {tag: "Number"}}], body: {tag: "var", name: "x"} }
   p Parser.new("(x: number, y: number) => x + y").parse #=> { tag: "func", params: [{name: "x", type: {tag: "Number"}}, {name: "y", type: {tag: "Number"}}], body: {tag: "add", left: {tag: "var", name: "x"}, right: {tag: "var", name: "y"}} }
   p Parser.new("(x: number, y: number) => x + z").parse #=> { tag: "func", params: [{name: "x", type: {tag: "Number"}}, {name: "y", type: {tag: "Number"}}], body: {tag: "add", left: {tag: "var", name: "x"}, right: {tag: "var", name: "z"}} }
+  p Parser.new("1 + true").parse #=> {tag: "add", left: {tag: "number", n: 1}, right: {tag: "true"}}
 end

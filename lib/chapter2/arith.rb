@@ -36,7 +36,7 @@ class Checker
       raise "number expected" if rightTy[:tag] != "Number"
       { tag: "Number" }
     else
-      raise "not implemented"
+      raise "not implemented, term = #{t}"
     end
   end
 end

@@ -1,7 +1,37 @@
+# TODO: 無名関数
+# (x: boolean) => 42;
+
+# TODO: 変数参照
+# (x: number) => x;
+# (x: number, y: number) => x + y;
+# (x: number, y: number) => x + z;
+
+# TODO: 関数呼び出し
+# ( (x: number) => x )(42);
+# ( (x: number) => x )(true);
+# ( (x: number) => 42 )(1, 2, 3);
+
+# TODO: 関数型
+# (f: (x: number) => number) => 1
+
+# type Type =
+#   | { tag: "Boolean" }
+#   | { tag: "Number" }
+# type Term =
+#   | { tag: "true" }
+#   | { tag: "false" }
+#   | { tag: "if"; cond: Term; thn: Term; els: Term }
+#   | { tag: "number"; n: number }
+#   | { tag: "add"; left: Term; right: Term }
+#   | { tag: "var"; name: string }
+#   | { tag: "func"; params: Param[]; body: Term }
+#   | { tag: "call"; func: Term; args: Term[] }
+# type Param = { name: string; type: Type };
+
 # --- Step 1: Tokenizer ---
 class Tokenizer
   KEYWORDS = %w[true false]
-  SYMBOLS = %w[+ ? : ( )]
+  SYMBOLS = %w[+ ? : ( ) => ,]
 
   def initialize(input)
     @input = input
@@ -11,9 +41,16 @@ class Tokenizer
   def next_token
     skip_whitespace
     return nil if eof?
+    # 複合記号 =>
+    if @input[@pos, 2] == "=>"
+      @pos += 2
+      return "=>"
+    end
     c = peek
     if c =~ /[0-9]/
       read_number
+    elsif c =~ /[a-zA-Z_]/
+      read_ident
     elsif letter = read_keyword
       letter
     elsif SYMBOLS.include?(c)
@@ -22,6 +59,12 @@ class Tokenizer
     else
       raise "Unexpected character: #{c}"
     end
+  end
+
+  def read_ident
+    start = @pos
+    @pos += 1 while !eof? && @input[@pos] =~ /[a-zA-Z0-9_]/
+    { type: :ident, value: @input[start...@pos] }
   end
 
   def tokenize
@@ -124,16 +167,112 @@ class Parser
         else
           raise "Unknown keyword: #{tok[:value]}"
         end
+      elsif tok[:type] == :ident
+        # 変数参照は次ステップで対応
+        { tag: "var", name: tok[:value] }
       else
         raise "Unknown token: #{tok}"
       end
     when "("
-      node = parse_if
-      expect_token(")")
-      node
+      # 関数 or 括弧式
+      if func_param_list?
+        parse_func
+      else
+        node = parse_if
+        expect_token(")")
+        node
+      end
     else
       raise "Unexpected token: #{tok.inspect}"
     end
+  end
+
+  # (x: number, y: boolean) => body
+  def parse_func
+    params = []
+    # パラメータリスト
+    loop do
+      name_tok = next_token
+      raise "Expected param name" unless name_tok.is_a?(Hash) && name_tok[:type] == :ident
+      expect_token(":")
+      type_tok = parse_type
+      params << { name: name_tok[:value], type: type_tok }
+      if peek_token == ","
+        next_token
+      else
+        break
+      end
+    end
+    expect_token(")")
+    expect_token("=>")
+    body = parse_if
+    { tag: "func", params: params, body: body }
+  end
+
+  # Type型のパース
+  def parse_type
+    tok = next_token
+    if tok.is_a?(Hash) && tok[:type] == :ident
+      case tok[:value]
+      when "number"
+        { tag: "Number" }
+      when "boolean"
+        { tag: "Boolean" }
+      else
+        raise "Unknown type: #{tok[:value]}"
+      end
+    elsif tok == "("
+      # 関数型 (x: number) => number
+      param_types = []
+      loop do
+        name_tok = next_token
+        raise "Expected param name in type" unless name_tok.is_a?(Hash) && name_tok[:type] == :ident
+        expect_token(":")
+        type_tok = parse_type
+        param_types << { name: name_tok[:value], type: type_tok }
+        if peek_token == ","
+          next_token
+        else
+          break
+        end
+      end
+      expect_token(")")
+      expect_token("=>")
+      ret_type = parse_type
+      { tag: "FuncType", params: param_types, ret: ret_type }
+    else
+      raise "Unknown type syntax: #{tok.inspect}"
+    end
+  end
+
+  def func_param_list?
+    # 現在のトークン位置がパラメータリストの開始か判定
+    # (ident : ident (, ident : ident)*) =>
+    save_pos = @pos
+    begin
+      name = @tokens[@pos]
+      return false unless name.is_a?(Hash) && name[:type] == :ident
+      colon = @tokens[@pos+1]
+      return false unless colon == ":"
+      type = @tokens[@pos+2]
+      return false unless type.is_a?(Hash) && type[:type] == :ident
+      # , か )
+      nxt = @tokens[@pos+3]
+      while nxt == ","
+        name = @tokens[@pos+4]
+        return false unless name.is_a?(Hash) && name[:type] == :ident
+        colon = @tokens[@pos+5]
+        return false unless colon == ":"
+        type = @tokens[@pos+6]
+        return false unless type.is_a?(Hash) && type[:type] == :ident
+        nxt = @tokens[@pos+7]
+        @pos += 4
+      end
+      nxt == ")" && @tokens[@pos+(@pos==save_pos ? 3 : 7)] == ")" && @tokens[@pos+(@pos==save_pos ? 4 : 8)] == "=>"
+    ensure
+      @pos = save_pos
+    end
+    true
   end
 
   def next_token
@@ -167,4 +306,6 @@ if __FILE__ == $0
   p Parser.new("true ? false : true").parse #=> { tag: "if", cond: {tag: "true"}, thn: {tag: "false"}, els: {tag: "true"} }
   p Parser.new("true ? 1 : true").parse #=> { tag: "if", cond: {tag: "true"}, thn: {tag: "number", n: 1}, els: {tag: "true"} }
   p Parser.new("true ? (1 + 2) : (3 + (false ? 4 : 5))").parse #=> { tag: "if", cond: {tag: "true"}, thn: {tag: "add", left: {tag: "number", n: 1}, right: {tag: "number", n: 2}}, els: {tag: "add", left: {tag: "number", n: 3}, right: {tag: "if", cond: {tag: "false"}, thn: {tag: "number", n: 4}, els: {tag: "number", n: 5}}} }
+  p Parser.new("(x: number) => 42").parse #=> { tag: "func", params: [{name: "x", type: {tag: "Number"}}], body: {tag: "number", n: 42} }
+  p Parser.new("(x: boolean, y: number) => x + y").parse #=> { tag: "func", params: [{name: "x", type: {tag: "Boolean"}}, {name: "y", type: {tag: "Number"}}], body: {tag: "add", left: {tag: "var", name: "x"}, right: {tag: "var", name: "y"}} }
 end

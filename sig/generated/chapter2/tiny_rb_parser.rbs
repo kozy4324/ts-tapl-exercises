@@ -40,6 +40,12 @@ class TinyRbParser
   # : (String) -> Term
   def self.parse: (String) -> Term
 
-  # : (Prism::node) -> Term
-  def self.term: (Prism::node) -> Term
+  # type Term =
+  #   | { tag: "true" }
+  #   | { tag: "false" }
+  #   | { tag: "if"; cond: Term; thn: Term; els: Term }
+  #   | { tag: "number"; n: number }
+  #   | { tag: "add"; left: Term; right: Term };
+  # : (Hash[Symbol, untyped]) -> Term
+  def self.term: (Hash[Symbol, untyped]) -> Term
 end

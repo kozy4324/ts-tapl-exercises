@@ -1,6 +1,6 @@
 # rbs_inline: enabled
 
-require "prism"
+require_relative "../parser/parser"
 
 class TinyRbParser
   class Term; end
@@ -38,43 +38,32 @@ class TinyRbParser
 
   #: (String) -> Term
   def self.parse(source)
-    result = Prism.parse(source) # Prism::ParseResult
-    statements = result.value.statements # Prism::StatementsNode
-    nodes = statements.body # Array[Prism::node]
-    node = nodes.first # Prism::node
-
-    term(node)
+    term(Parser.new(source).parse)
   rescue RuntimeError => e
     raise "#{e.message}; source => #{source}"
   end
 
-  #: (Prism::node) -> Term
+  # type Term =
+  #   | { tag: "true" }
+  #   | { tag: "false" }
+  #   | { tag: "if"; cond: Term; thn: Term; els: Term }
+  #   | { tag: "number"; n: number }
+  #   | { tag: "add"; left: Term; right: Term };
+  #: (Hash[Symbol, untyped]) -> Term
   def self.term(node)
     case
-    when node.is_a?(Prism::TrueNode)
+    when node[:tag] == "true"
       TrueTerm.new
-    when node.is_a?(Prism::FalseNode)
+    when node[:tag] == "false"
       FalseTerm.new
-    when node.is_a?(Prism::IfNode)
-      statements = node.statements or raise "Unknown node type"
-      subsequent = node.subsequent or raise "Unknown node type"
-      raise "Unknown node type" unless subsequent.is_a?(Prism::ElseNode)
-      elsNode = subsequent.statements&.body&.first or raise "Unknown node type"
-      IfTerm.new(cond: term(node.predicate), thn: term(statements.body.first), els: term(elsNode))
-    when node.is_a?(Prism::IntegerNode)
-      NumberTerm.new(n: node.value)
-    when node.is_a?(Prism::CallNode)
-      leftNode = node.receiver
-      raise "Unknown node type" unless leftNode.is_a?(Prism::IntegerNode) && node.name == :+
-      rightNode = node.arguments&.arguments&.first or raise "Unknown node type"
-      AddTerm.new(left: term(leftNode), right: term(rightNode))
-    when node.is_a?(Prism::ParenthesesNode)
-      statements = node.body
-      raise "Unknown node type" unless statements.is_a?(Prism::StatementsNode)
-      bodyNode = statements.body.first or raise "Unknown node type"
-      term(bodyNode)
+    when node[:tag] == "if"
+      IfTerm.new(cond: term(node[:cond]), thn: term(node[:thn]), els: term(node[:els]))
+    when node[:tag] == "number"
+      NumberTerm.new(n: node[:n])
+    when node[:tag] == "add"
+      AddTerm.new(left: term(node[:left]), right: term(node[:right]))
     else
-      raise "Unknown node type; node => #{node.class}"
+      raise "Unknown node type; node => #{node}"
     end
   end
 end

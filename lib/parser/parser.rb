@@ -1,6 +1,3 @@
-# TODO: 関数型
-# (f: (x: number) => number) => 1
-
 # type Type =
 #   | { tag: "Boolean" }
 #   | { tag: "Number" }
@@ -252,7 +249,9 @@ class Parser
       expect_token(")")
       expect_token("=>")
       ret_type = parse_type
-      { tag: "FuncType", params: param_types, ret: ret_type }
+      # コメントの期待値に合わせて tag は "func"、
+      # キーは retType とする
+      { tag: "func", params: param_types, retType: ret_type }
     else
       raise "Unknown type syntax: #{tok.inspect}"
     end
@@ -260,32 +259,48 @@ class Parser
 
   def func_param_list?
     # 現在のトークン位置がパラメータリストの開始か判定
-    # (ident : ident (, ident : ident)*) =>
+    # より柔軟にするため、単純なパターンマッチング
     save_pos = @pos
     begin
-      name = @tokens[@pos]
-      return false unless name.is_a?(Hash) && name[:type] == :ident
-      colon = @tokens[@pos+1]
-      return false unless colon == ":"
-      type = @tokens[@pos+2]
-      return false unless type.is_a?(Hash) && type[:type] == :ident
-      # , か )
-      nxt = @tokens[@pos+3]
-      while nxt == ","
-        name = @tokens[@pos+4]
-        return false unless name.is_a?(Hash) && name[:type] == :ident
-        colon = @tokens[@pos+5]
-        return false unless colon == ":"
-        type = @tokens[@pos+6]
-        return false unless type.is_a?(Hash) && type[:type] == :ident
-        nxt = @tokens[@pos+7]
-        @pos += 4
+      # パラメータ名はident
+      return false unless @pos < @tokens.size && @tokens[@pos].is_a?(Hash) && @tokens[@pos][:type] == :ident
+      
+      # ：が続く
+      return false unless @pos + 1 < @tokens.size && @tokens[@pos + 1] == ":"
+      
+      # タイプの後には, か ) が続く必要がある
+      # タイプ自体は複雑な可能性があるので細かくチェックしない
+      i = @pos + 2
+      # タイプをスキップ（括弧のネストも考慮）
+      paren_count = 0
+      while i < @tokens.size
+        tok = @tokens[i]
+        if tok == "("
+          paren_count += 1
+        elsif tok == ")"
+          if paren_count == 0
+            # パラメータリスト終了
+            break
+          end
+          paren_count -= 1
+        elsif tok == "," && paren_count == 0
+          # 次のパラメータ
+          break
+        end
+        i += 1
       end
-      nxt == ")" && @tokens[@pos+(@pos==save_pos ? 3 : 7)] == ")" && @tokens[@pos+(@pos==save_pos ? 4 : 8)] == "=>"
+      
+      return false if i >= @tokens.size
+      
+      # ")" の後に "=>" があるか
+      if @tokens[i] == ")"
+        return false unless i + 1 < @tokens.size && @tokens[i + 1] == "=>"
+      end
+      
+      true
     ensure
       @pos = save_pos
     end
-    true
   end
 
   def next_token
@@ -331,4 +346,5 @@ if __FILE__ == $0
   p Parser.new("((x: number) => x)(42)").parse #=> { tag: "call", func: { tag: "func", params: [{name: "x", type: {tag: "Number"}}], body: {tag: "var", name: "x"} }, args: [{tag: "number", n: 42}] }
   p Parser.new("((x: number) => x)(true)").parse #=> { tag: "call", func: { tag: "func", params: [{name: "x", type: {tag: "Number"}}], body: {tag: "var", name: "x"} }, args: [{tag: "true"}] }
   p Parser.new("((x: number) => 42)(1, 2, 3)").parse #=> { tag: "call", func: { tag: "func", params: [{name: "x", type: {tag: "Number"}}], body: {tag: "number", n: 42} }, args: [{tag: "number", n: 1}, {tag: "number", n: 2}, {tag: "number", n: 3}] }
+  p Parser.new("(f: (x: number) => number) => 1").parse #=> { tag: "func", params: [{name: "f", type: { tag: "func", params: [{name: "x", type: {tag: "Number"}}], retType: {tag: "Number"} }}], body: {tag: "number", n: 1} }
 end

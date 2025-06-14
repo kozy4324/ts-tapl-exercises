@@ -1,6 +1,3 @@
-# TODO: 無名関数
-# (x: boolean) => 42;
-
 # TODO: 変数参照
 # (x: number) => x;
 # (x: number, y: number) => x + y;
@@ -17,6 +14,7 @@
 # type Type =
 #   | { tag: "Boolean" }
 #   | { tag: "Number" }
+#   | { tag: "Func"; params: Param[]; retType: Type };
 # type Term =
 #   | { tag: "true" }
 #   | { tag: "false" }
@@ -168,7 +166,7 @@ class Parser
           raise "Unknown keyword: #{tok[:value]}"
         end
       elsif tok[:type] == :ident
-        # 変数参照は次ステップで対応
+        # 変数参照
         { tag: "var", name: tok[:value] }
       else
         raise "Unknown token: #{tok}"
@@ -308,4 +306,7 @@ if __FILE__ == $0
   p Parser.new("true ? (1 + 2) : (3 + (false ? 4 : 5))").parse #=> { tag: "if", cond: {tag: "true"}, thn: {tag: "add", left: {tag: "number", n: 1}, right: {tag: "number", n: 2}}, els: {tag: "add", left: {tag: "number", n: 3}, right: {tag: "if", cond: {tag: "false"}, thn: {tag: "number", n: 4}, els: {tag: "number", n: 5}}} }
   p Parser.new("(x: number) => 42").parse #=> { tag: "func", params: [{name: "x", type: {tag: "Number"}}], body: {tag: "number", n: 42} }
   p Parser.new("(x: boolean, y: number) => x + y").parse #=> { tag: "func", params: [{name: "x", type: {tag: "Boolean"}}, {name: "y", type: {tag: "Number"}}], body: {tag: "add", left: {tag: "var", name: "x"}, right: {tag: "var", name: "y"}} }
+  p Parser.new("(x: number) => x").parse #=> { tag: "func", params: [{name: "x", type: {tag: "Number"}}], body: {tag: "var", name: "x"} }
+  p Parser.new("(x: number, y: number) => x + y").parse #=> { tag: "func", params: [{name: "x", type: {tag: "Number"}}, {name: "y", type: {tag: "Number"}}], body: {tag: "add", left: {tag: "var", name: "x"}, right: {tag: "var", name: "y"}} }
+  p Parser.new("(x: number, y: number) => x + z").parse #=> { tag: "func", params: [{name: "x", type: {tag: "Number"}}, {name: "y", type: {tag: "Number"}}], body: {tag: "add", left: {tag: "var", name: "x"}, right: {tag: "var", name: "z"}} }
 end

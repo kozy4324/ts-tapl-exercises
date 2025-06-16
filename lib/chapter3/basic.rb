@@ -1,6 +1,6 @@
 # rbs_inline: enabled
 
-require_relative "./tiny_rb_parser"
+require_relative "../parser/parser"
 
 # @rbs!
 #   type Chapter3::typeEnv = Hash[String, Chapter3::typ]
@@ -10,40 +10,40 @@ module Chapter3
     #: (Chapter3::TinyRbParser::Term, Chapter3::typeEnv) -> Chapter3::typ
     def self.typecheck(t, tyEnv)
       case
-      when t.is_a?(TinyRbParser::TrueTerm)
+      when t[:tag] == "true"
         { tag: "Boolean" }
-      when t.is_a?(TinyRbParser::FalseTerm)
+      when t[:tag] == "false"
         { tag: "Boolean" }
-      when t.is_a?(TinyRbParser::IfTerm)
-        condTy = typecheck(t.cond, tyEnv)
+      when t[:tag] == "if"
+        condTy = typecheck(t[:cond], tyEnv)
         raise "boolean expected" if condTy[:tag] != "Boolean"
-        thnTy = typecheck(t.thn, tyEnv)
-        elsTy = typecheck(t.els, tyEnv)
+        thnTy = typecheck(t[:thn], tyEnv)
+        elsTy = typecheck(t[:els], tyEnv)
         raise "then and else have different types" if thnTy[:tag] != elsTy[:tag]
         return thnTy
-      when t.is_a?(TinyRbParser::NumberTerm)
+      when t[:tag] == "number"
         { tag: "Number" }
-      when t.is_a?(TinyRbParser::AddTerm)
-        leftTy = typecheck(t.left, tyEnv)
+      when t[:tag] == "add"
+        leftTy = typecheck(t[:left], tyEnv)
         raise "number expected" if leftTy[:tag] != "Number"
-        rightTy = typecheck(t.right, tyEnv)
+        rightTy = typecheck(t[:right], tyEnv)
         raise "number expected" if rightTy[:tag] != "Number"
         { tag: "Number" }
-      when t.is_a?(TinyRbParser::VarTerm)
-        raise "variable not found" unless tyEnv.key? t.name
-        tyEnv[t.name]
-      when t.is_a?(TinyRbParser::FuncTerm)
+      when t[:tag] == "var"
+        raise "variable not found" unless tyEnv.key? t[:name]
+        tyEnv[t[:name]]
+      when t[:tag] == "func"
         newTyEnv = tyEnv.dup
-        t.params.each do |p|
+        t[:params].each do |p|
           newTyEnv[p[:name]] = p[:type] unless p[:type].nil?
         end
-        { tag: "Func", params: t.params.map { |p| p[:type] }, retType: typecheck(t.body, newTyEnv) }
-      when t.is_a?(TinyRbParser::CallTerm)
-        funcTy = typecheck(t.func, tyEnv)
+        { tag: "Func", params: t[:params], retType: typecheck(t[:body], newTyEnv) }
+      when t[:tag] == "call"
+        funcTy = typecheck(t[:func], tyEnv)
         raise "function type expected" unless funcTy[:tag] == "Func"
         # funcTy が FuncType であることが自明だが steep は narrowing できないパターン
-        raise "wrong number of arguments" if funcTy[:params].size != t.args.size
-        raise "argument type mismatch" if funcTy[:params].zip(t.args).any? { |param, argTerm| !typeEq(param, typecheck(argTerm, tyEnv))} # steep:ignore
+        raise "wrong number of arguments" if funcTy[:params].size != t[:args].size
+        raise "argument type mismatch" if funcTy[:params].zip(t[:args]).any? { |param, argTerm| !typeEq(param[:type], typecheck(argTerm, tyEnv))} # steep:ignore
         retType = funcTy[:retType]
         raise "never raise..." if retType.is_a?(String)
         raise "return type declaration is required" if retType.nil?

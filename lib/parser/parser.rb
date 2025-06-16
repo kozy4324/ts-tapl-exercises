@@ -249,9 +249,8 @@ class Parser
       expect_token(")")
       expect_token("=>")
       ret_type = parse_type
-      # コメントの期待値に合わせて tag は "func"、
-      # キーは retType とする
-      { tag: "func", params: param_types, retType: ret_type }
+      # コメントの期待値に合わせてキーは retType とする
+      { tag: "Func", params: param_types, retType: ret_type }
     else
       raise "Unknown type syntax: #{tok.inspect}"
     end
@@ -346,5 +345,5 @@ if __FILE__ == $0
   p Parser.new("((x: number) => x)(42)").parse #=> { tag: "call", func: { tag: "func", params: [{name: "x", type: {tag: "Number"}}], body: {tag: "var", name: "x"} }, args: [{tag: "number", n: 42}] }
   p Parser.new("((x: number) => x)(true)").parse #=> { tag: "call", func: { tag: "func", params: [{name: "x", type: {tag: "Number"}}], body: {tag: "var", name: "x"} }, args: [{tag: "true"}] }
   p Parser.new("((x: number) => 42)(1, 2, 3)").parse #=> { tag: "call", func: { tag: "func", params: [{name: "x", type: {tag: "Number"}}], body: {tag: "number", n: 42} }, args: [{tag: "number", n: 1}, {tag: "number", n: 2}, {tag: "number", n: 3}] }
-  p Parser.new("(f: (x: number) => number) => 1").parse #=> { tag: "func", params: [{name: "f", type: { tag: "func", params: [{name: "x", type: {tag: "Number"}}], retType: {tag: "Number"} }}], body: {tag: "number", n: 1} }
+  p Parser.new("(f: (x: number) => number) => 1").parse #=> { tag: "func", params: [{name: "f", type: { tag: "Func", params: [{name: "x", type: {tag: "Number"}}], retType: {tag: "Number"} }}], body: {tag: "number", n: 1} }
 end

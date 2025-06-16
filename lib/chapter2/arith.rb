@@ -1,19 +1,19 @@
 # rbs_inline: enabled
 
 require_relative "../parser/parser"
-# type Term =
-#   | { tag: "true" }
-#   | { tag: "false" }
-#   | { tag: "if"; cond: Term; thn: Term; els: Term }
-#   | { tag: "number"; n: number }
-#   | { tag: "add"; left: Term; right: Term };
+# @rbs!
+#   type term = { tag: "true" }
+#             | { tag: "false" }
+#             | { tag: "if", cond: term, thn: term, els: term }
+#             | { tag: "number", n: Integer }
+#             | { tag: "add", left: term, right: term }
 
 # @rbs!
 #   type typ = { tag: "Boolean" }
 #            | { tag: "Number" }
 
 class Checker
-  #: (TinyRbParser::Term) -> typ
+  #: (term) -> typ
   def self.typecheck(t)
     case
     when t[:tag] == "true"
@@ -21,18 +21,23 @@ class Checker
     when t[:tag] == "false"
       { tag: "Boolean" }
     when t[:tag] == "if"
-      condTy = typecheck(t[:cond])
+      cond = t[:cond] #: term
+      thn = t[:thn] #: term
+      els = t[:els] #: term
+      condTy = typecheck(cond)
       raise "boolean expected" if condTy[:tag] != "Boolean"
-      thnTy = typecheck(t[:thn])
-      elsTy = typecheck(t[:els])
+      thnTy = typecheck(thn)
+      elsTy = typecheck(els)
       raise "then and else have different types" if thnTy[:tag] != elsTy[:tag]
       return thnTy
     when t[:tag] == "number"
       { tag: "Number" }
     when t[:tag] == "add"
-      leftTy = typecheck(t[:left])
+      left = t[:left] #: term
+      right = t[:right] #: term
+      leftTy = typecheck(left)
       raise "number expected" if leftTy[:tag] != "Number"
-      rightTy = typecheck(t[:right])
+      rightTy = typecheck(right)
       raise "number expected" if rightTy[:tag] != "Number"
       { tag: "Number" }
     else

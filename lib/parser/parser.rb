@@ -53,7 +53,7 @@ class Tokenizer
   end
 
   def tokenize
-    tokens = []
+    tokens = [] #: Array[untyped]
     while (tok = next_token)
       tokens << tok
     end
@@ -141,7 +141,7 @@ class Parser
     node = parse_factor
     while peek_token == "("
       next_token # consume '('
-      args = []
+      args = [] #: Array[untyped]
       unless peek_token == ")"
         loop do
           args << parse_if
@@ -199,7 +199,7 @@ class Parser
 
   # (x: number, y: boolean) => body
   def parse_func
-    params = []
+    params = [] #: Array[untyped]
     # パラメータリスト
     loop do
       name_tok = next_token
@@ -233,7 +233,7 @@ class Parser
       end
     elsif tok == "("
       # 関数型 (x: number) => number
-      param_types = []
+      param_types = [] #: Array[untyped]
       loop do
         name_tok = next_token
         raise "Expected param name in type" unless name_tok.is_a?(Hash) && name_tok[:type] == :ident

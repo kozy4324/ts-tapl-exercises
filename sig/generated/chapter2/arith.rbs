@@ -1,8 +1,10 @@
 # Generated from lib/chapter2/arith.rb with RBS::Inline
 
 class Checker
-  # : (TinyRbParser::Term) -> typ
-  def self.typecheck: (TinyRbParser::Term) -> typ
+  # : (term) -> typ
+  def self.typecheck: (term) -> typ
 end
+
+type term = { tag: "true" } | { tag: "false" } | { tag: "if", cond: term, thn: term, els: term } | { tag: "number", n: Integer } | { tag: "add", left: term, right: term }
 
 type typ = { tag: "Boolean" } | { tag: "Number" }

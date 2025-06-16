@@ -3,11 +3,32 @@
 require_relative "../parser/parser"
 
 # @rbs!
-#   type Chapter3::typeEnv = Hash[String, Chapter3::typ]
+#   type Chapter3::term = { tag: "true" }
+#                       | { tag: "false" }
+#                       | { tag: "if", cond: Chapter3::term, thn: Chapter3::term, els: Chapter3::term }
+#                       | { tag: "number", n: Integer }
+#                       | { tag: "add", left: Chapter3::term, right: Chapter3::term }
+#                       | { tag: "var", name: string }
+#                       | { tag: "func", params: Array[Chapter3::param], body: Chapter3::term }
+#                       | { tag: "call", func: Chapter3::term, args: Array[Chapter3::term] }
+
+#   type Chapter3::typ = { tag: "Boolean" }
+#                      | { tag: "Number" }
+#                      | { tag: "Func", params: Array[Chapter3::param], retType: Chapter3::typ }
+
+# @rbs!
+#   type Chapter3::param = { name: string, type: untyped }
+
+#   type Chapter3::param = { name: string, type: Chapter3::typ }
+
+# @rbs!
+#   type Chapter3::typeEnv = Hash[string, untyped]
+
+#   type Chapter3::typeEnv = Hash[string, Chapter3::typ]
 
 module Chapter3
   class Checker
-    #: (Chapter3::TinyRbParser::Term, Chapter3::typeEnv) -> Chapter3::typ
+    #: (untyped, untyped) -> untyped
     def self.typecheck(t, tyEnv)
       case
       when t[:tag] == "true"
@@ -53,7 +74,7 @@ module Chapter3
       end
     end
 
-    #: (Chapter3::typ, Chapter3::typ) -> bool
+    #: (untyped, untyped) -> untyped
     def self.typeEq(ty1, ty2)
       case ty2[:tag]
       when "Boolean"

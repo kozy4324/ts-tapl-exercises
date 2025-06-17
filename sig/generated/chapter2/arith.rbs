@@ -1,10 +1,6 @@
 # Generated from lib/chapter2/arith.rb with RBS::Inline
 
 class Checker
-  # : (term) -> typ
-  def self.typecheck: (term) -> typ
+  # : (Chapter3::term) -> untyped
+  def self.typecheck: (Chapter3::term) -> untyped
 end
-
-type term = { tag: "true" } | { tag: "false" } | { tag: "if", cond: term, thn: term, els: term } | { tag: "number", n: Integer } | { tag: "add", left: term, right: term }
-
-type typ = { tag: "Boolean" } | { tag: "Number" }

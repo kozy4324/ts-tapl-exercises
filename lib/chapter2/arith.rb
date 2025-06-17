@@ -1,19 +1,9 @@
 # rbs_inline: enabled
 
 require_relative "../parser/parser"
-# @rbs!
-#   type term = { tag: "true" }
-#             | { tag: "false" }
-#             | { tag: "if", cond: term, thn: term, els: term }
-#             | { tag: "number", n: Integer }
-#             | { tag: "add", left: term, right: term }
-
-# @rbs!
-#   type typ = { tag: "Boolean" }
-#            | { tag: "Number" }
 
 class Checker
-  #: (term) -> typ
+  #: (Chapter3::term) -> untyped
   def self.typecheck(t)
     case
     when t[:tag] == "true"
@@ -21,9 +11,9 @@ class Checker
     when t[:tag] == "false"
       { tag: "Boolean" }
     when t[:tag] == "if"
-      cond = t[:cond] #: term
-      thn = t[:thn] #: term
-      els = t[:els] #: term
+      cond = t[:cond] #: Chapter3::term
+      thn = t[:thn] #: Chapter3::term
+      els = t[:els] #: Chapter3::term
       condTy = typecheck(cond)
       raise "boolean expected" if condTy[:tag] != "Boolean"
       thnTy = typecheck(thn)
@@ -33,8 +23,8 @@ class Checker
     when t[:tag] == "number"
       { tag: "Number" }
     when t[:tag] == "add"
-      left = t[:left] #: term
-      right = t[:right] #: term
+      left = t[:left] #: Chapter3::term
+      right = t[:right] #: Chapter3::term
       leftTy = typecheck(left)
       raise "number expected" if leftTy[:tag] != "Number"
       rightTy = typecheck(right)

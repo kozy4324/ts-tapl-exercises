@@ -1,0 +1,69 @@
+# Generated from lib/parser/parser.rb with RBS::Inline
+
+# --- Step 1: Tokenizer ---
+class Tokenizer
+  KEYWORDS: ::Array[untyped]
+
+  SYMBOLS: ::Array[untyped]
+
+  def initialize: (untyped input) -> untyped
+
+  def next_token: () -> untyped
+
+  def read_ident: () -> untyped
+
+  def tokenize: () -> untyped
+
+  private
+
+  def skip_whitespace: () -> untyped
+
+  def eof?: () -> untyped
+
+  def peek: () -> untyped
+
+  def read_number: () -> untyped
+
+  def read_keyword: () -> untyped
+end
+
+# --- Step 3: Literal Parser ---
+class Parser
+  def initialize: (untyped input) -> untyped
+
+  def parse: () -> untyped
+
+  private
+
+  # if式: cond ? thn : els
+  def parse_if: () -> untyped
+
+  # 加算式: term = call ("+" call)*
+  def parse_term: () -> untyped
+
+  # 関数呼び出し: call = factor ("(" args ")")*
+  def parse_call: () -> untyped
+
+  # factor: 数値・true/false・括弧
+  def parse_factor: () -> untyped
+
+  # (x: number, y: boolean) => body
+  def parse_func: () -> untyped
+
+  # Type型のパース
+  def parse_type: () -> untyped
+
+  def func_param_list?: () -> untyped
+
+  def next_token: () -> untyped
+
+  def peek_token: () -> untyped
+
+  def expect_token: (untyped val) -> untyped
+end
+
+type Chapter3::term = { tag: "true" } | { tag: "false" } | { tag: "if", cond: Chapter3::term, thn: Chapter3::term, els: Chapter3::term } | { tag: "number", n: Integer } | { tag: "add", left: Chapter3::term, right: Chapter3::term } | { tag: "var", name: string } | { tag: "func", params: Array[Chapter3::param], body: Chapter3::term } | { tag: "call", func: Chapter3::term, args: Array[Chapter3::term] }
+
+type Chapter3::param = { name: string, type: untyped }
+
+type Chapter3::typeEnv = Hash[string, untyped]

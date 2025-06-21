@@ -1,28 +1,25 @@
 # rbs_inline: enabled
 
 # @rbs!
-#   type Chapter3::term = { tag: "true" }
-#                       | { tag: "false" }
-#                       | { tag: "if", cond: Chapter3::term, thn: Chapter3::term, els: Chapter3::term }
-#                       | { tag: "number", n: Integer }
-#                       | { tag: "add", left: Chapter3::term, right: Chapter3::term }
-#                       | { tag: "var", name: string }
-#                       | { tag: "func", params: Array[Chapter3::param], body: Chapter3::term }
-#                       | { tag: "call", func: Chapter3::term, args: Array[Chapter3::term] }
-
-#   type Chapter3::typ = { tag: "Boolean" }
-#                      | { tag: "Number" }
-#                      | { tag: "Func", params: Array[Chapter3::param], retType: Chapter3::typ }
+#   type term = { tag: "true" }
+#             | { tag: "false" }
+#             | { tag: "if", cond: term, thn: term, els: term }
+#             | { tag: "number", n: Integer }
+#             | { tag: "add", left: term, right: term }
+#             | { tag: "var", name: string }
+#             | { tag: "func", params: Array[param], body: term }
+#             | { tag: "call", func: term, args: Array[term] }
 
 # @rbs!
-#   type Chapter3::param = { name: string, type: untyped }
-
-#   type Chapter3::param = { name: string, type: Chapter3::typ }
+#   type typ = { tag: "Boolean" }
+#            | { tag: "Number" }
+#            | { tag: "Func", params: Array[param], retType: typ }
 
 # @rbs!
-#   type Chapter3::typeEnv = Hash[string, untyped]
+#   type param = { name: string, type: typ }
 
-#   type Chapter3::typeEnv = Hash[string, Chapter3::typ]
+# @rbs!
+#   type typeEnv = Hash[string, typ]
 
 # --- Step 1: Tokenizer ---
 class Tokenizer

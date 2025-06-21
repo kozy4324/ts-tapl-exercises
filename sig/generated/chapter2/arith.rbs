@@ -1,6 +1,6 @@
 # Generated from lib/chapter2/arith.rb with RBS::Inline
 
 class Checker
-  # : (Chapter3::term) -> untyped
-  def self.typecheck: (Chapter3::term) -> untyped
+  # : (term) -> untyped
+  def self.typecheck: (term) -> untyped
 end

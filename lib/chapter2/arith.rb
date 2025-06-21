@@ -3,7 +3,7 @@
 require_relative "../parser/parser"
 
 class Checker
-  #: (Chapter3::term) -> untyped
+  #: (term) -> untyped
   def self.typecheck(t)
     case
     when t[:tag] == "true"
@@ -11,9 +11,9 @@ class Checker
     when t[:tag] == "false"
       { tag: "Boolean" }
     when t[:tag] == "if"
-      cond = t[:cond] #: Chapter3::term
-      thn = t[:thn] #: Chapter3::term
-      els = t[:els] #: Chapter3::term
+      cond = t[:cond] #: term
+      thn = t[:thn] #: term
+      els = t[:els] #: term
       condTy = typecheck(cond)
       raise "boolean expected" if condTy[:tag] != "Boolean"
       thnTy = typecheck(thn)
@@ -23,8 +23,8 @@ class Checker
     when t[:tag] == "number"
       { tag: "Number" }
     when t[:tag] == "add"
-      left = t[:left] #: Chapter3::term
-      right = t[:right] #: Chapter3::term
+      left = t[:left] #: term
+      right = t[:right] #: term
       leftTy = typecheck(left)
       raise "number expected" if leftTy[:tag] != "Number"
       rightTy = typecheck(right)

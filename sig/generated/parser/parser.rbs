@@ -62,8 +62,10 @@ class Parser
   def expect_token: (untyped val) -> untyped
 end
 
-type Chapter3::term = { tag: "true" } | { tag: "false" } | { tag: "if", cond: Chapter3::term, thn: Chapter3::term, els: Chapter3::term } | { tag: "number", n: Integer } | { tag: "add", left: Chapter3::term, right: Chapter3::term } | { tag: "var", name: string } | { tag: "func", params: Array[Chapter3::param], body: Chapter3::term } | { tag: "call", func: Chapter3::term, args: Array[Chapter3::term] }
+type term = { tag: "true" } | { tag: "false" } | { tag: "if", cond: term, thn: term, els: term } | { tag: "number", n: Integer } | { tag: "add", left: term, right: term } | { tag: "var", name: string } | { tag: "func", params: Array[param], body: term } | { tag: "call", func: term, args: Array[term] }
 
-type Chapter3::param = { name: string, type: untyped }
+type typ = { tag: "Boolean" } | { tag: "Number" } | { tag: "Func", params: Array[param], retType: typ }
 
-type Chapter3::typeEnv = Hash[string, untyped]
+type param = { name: string, type: typ }
+
+type typeEnv = Hash[string, typ]

@@ -2,10 +2,10 @@
 
 module Chapter3
   class Checker
-    # : (untyped, untyped) -> untyped
-    def self.typecheck: (untyped, untyped) -> untyped
+    # : (term, typeEnv) -> typ
+    def self.typecheck: (term, typeEnv) -> typ
 
-    # : (untyped, untyped) -> untyped
-    def self.typeEq: (untyped, untyped) -> untyped
+    # : (typ, typ) -> bool
+    def self.typeEq: (typ, typ) -> bool
   end
 end

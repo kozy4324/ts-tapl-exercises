@@ -4,7 +4,7 @@ require_relative "../parser/parser"
 
 module Chapter3
   class Checker
-    #: (untyped, untyped) -> untyped
+    #: (term, typeEnv) -> typ
     def self.typecheck(t, tyEnv)
       case
       when t[:tag] == "true"
@@ -50,7 +50,7 @@ module Chapter3
       end
     end
 
-    #: (untyped, untyped) -> untyped
+    #: (typ, typ) -> bool
     def self.typeEq(ty1, ty2)
       case ty2[:tag]
       when "Boolean"

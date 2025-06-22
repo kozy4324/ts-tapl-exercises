@@ -3,7 +3,7 @@
 require_relative "../parser/parser"
 
 class Checker
-  #: (term) -> untyped
+  #: (term) -> typ
   def self.typecheck(t)
     case
     when t[:tag] == "true"

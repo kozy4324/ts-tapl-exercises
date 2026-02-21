@@ -2,9 +2,9 @@
 
 # --- Step 1: Tokenizer ---
 class Tokenizer
-  KEYWORDS: ::Array[untyped]
+  KEYWORDS: ::Array[::String]
 
-  SYMBOLS: ::Array[untyped]
+  SYMBOLS: ::Array[::String]
 
   def initialize: (untyped input) -> untyped
 
